@@ -15,16 +15,28 @@ namespace FourGuardians.CourseContent.Movement
     public sealed class BasicPlayerMovement2D : MonoBehaviour
     {
         [Header("기본 이동")]
+        [Tooltip("좌우 입력이 있을 때 적용하는 최대 수평 속도입니다.")]
         [SerializeField] private float moveSpeed = 5f;
+        [Tooltip("지상 점프와 벽 점프에 사용하는 위쪽 초기 속도입니다.")]
         [SerializeField] private float jumpSpeed = 9f;
 
         [Header("특수 이동")]
+        [Tooltip("대시가 진행되는 동안 유지하는 수평 속도입니다.")]
         [SerializeField] private float dashSpeed = 11f;
+        [Tooltip("아래 방향과 이동 방향을 함께 눌렀을 때의 슬라이드 속도입니다.")]
         [SerializeField] private float slideSpeed = 8f;
+        [Tooltip("사다리에서 위·아래 입력으로 움직이는 속도입니다.")]
         [SerializeField] private float ladderSpeed = 3f;
+        [Tooltip("벽을 타고 내려올 때 허용하는 최대 하강 속도입니다.")]
         [SerializeField] private float wallSlideSpeed = 2f;
+        [Tooltip("벽 점프 시 벽 반대 방향으로 밀어내는 수평 속도입니다.")]
         [SerializeField] private float wallJumpHorizontalSpeed = 6f;
+        [Tooltip("벽 점프 직후 반대 입력 때문에 다시 벽으로 붙는 것을 막는 시간입니다.")]
         [SerializeField] private float wallJumpInputLockDuration = 0.18f;
+        [Tooltip("벽 동작 중 Visual을 Collider 반지름의 몇 배만큼 벽 쪽으로 보정할지 정합니다.")]
+        [SerializeField, Range(0f, 1f)] private float wallVisualInsetRatio = 0.5f;
+        [Tooltip("Collider가 벽 안으로 파고들지 않도록 남겨두는 아주 작은 간격입니다.")]
+        [SerializeField, Min(0f)] private float wallContactSkin = 0.01f;
 
         // 매번 배열을 새로 만들지 않고 재사용하여 불필요한 가비지 생성을 막는다.
         private readonly RaycastHit2D[] hits = new RaycastHit2D[4];
@@ -45,7 +57,13 @@ namespace FourGuardians.CourseContent.Movement
         public WarriorAction Action { get; private set; } = WarriorAction.Idle;
         public Vector2 Velocity => body == null ? Vector2.zero : body.linearVelocity;
         public int Facing => facing;
+        // 고정 픽셀값 대신 현재 Collider 반지름에 비례해 벽 동작의 그림 위치를 보정한다.
+        public float WallVisualOffset => bodyCollider == null
+            ? 0f
+            : bodyCollider.bounds.extents.x * wallVisualInsetRatio;
         public bool IsGrounded { get; private set; }
+        // Animator가 사다리 입력 여부를 확인할 수 있도록 읽기 전용으로 공개한다.
+        public float VerticalInput { get; private set; }
 
         private bool IsLocked => Action is WarriorAction.Attack1 or WarriorAction.Attack2 or WarriorAction.Hurt
             or WarriorAction.Dash or WarriorAction.DashAttack or WarriorAction.Slide
@@ -65,7 +83,10 @@ namespace FourGuardians.CourseContent.Movement
 
             horizontal = Axis(keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed,
                 keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed);
-            if (wallJumpInputLock <= 0f && Mathf.Abs(horizontal) > 0.01f)
+            // 대시는 시작 순간의 방향을 끝까지 유지한다.
+            // 입력값은 미리 읽어두되 대시가 끝나기 전에는 facing을 변경하지 않는다.
+            bool directionLocked = Action is WarriorAction.Dash or WarriorAction.DashAttack;
+            if (!directionLocked && wallJumpInputLock <= 0f && Mathf.Abs(horizontal) > 0.01f)
             {
                 facing = horizontal > 0f ? 1 : -1;
             }
@@ -83,7 +104,8 @@ namespace FourGuardians.CourseContent.Movement
             if (keyboard.jKey.wasPressedThisFrame) RequestAttack();
             if (keyboard.leftShiftKey.wasPressedThisFrame || keyboard.kKey.wasPressedThisFrame)
             {
-                Begin(WarriorAction.Dash, 0.7f);
+                // 짧은 시간에 빠르게 이동해야 대시가 걷기와 확실히 구분된다.
+                Begin(WarriorAction.Dash, 0.28f);
             }
             if (keyboard.hKey.wasPressedThisFrame) Begin(WarriorAction.Hurt, 0.2f);
             if (keyboard.lKey.wasPressedThisFrame)
@@ -102,9 +124,11 @@ namespace FourGuardians.CourseContent.Movement
             if (Action == WarriorAction.Death) return;
 
             float vertical = ReadVertical();
+            VerticalInput = vertical;
 
             if (isClimbing)
             {
+                // 사다리는 중력과 일반 이동을 사용하지 않으므로 가장 먼저 별도 처리한다.
                 UpdateLadderMovement(vertical);
                 jumpRequested = false;
                 return;
@@ -112,6 +136,7 @@ namespace FourGuardians.CourseContent.Movement
 
             if (IsLocked)
             {
+                // 공격과 대시는 정해진 시간이 끝나기 전까지 일반 이동이 상태를 덮어쓰지 않게 한다.
                 UpdateTimedAction();
                 jumpRequested = false;
                 return;
@@ -119,13 +144,14 @@ namespace FourGuardians.CourseContent.Movement
 
             if (nearLadder && ladderReentryCooldown <= 0f && Mathf.Abs(vertical) > 0.01f)
             {
+                // 사다리 영역에 닿기만 해서는 올라가지 않고, 세로 입력이 있을 때 진입한다.
                 EnterLadder();
                 UpdateLadderMovement(vertical);
                 return;
             }
 
             body.gravityScale = 3f;
-            if (jumpRequested && !IsGrounded && IsTouchingWall())
+            if (jumpRequested && !IsGrounded && TryGetWallContact(out _))
             {
                 // 벽의 반대 방향으로 밀어내면서 위로 점프한다.
                 int wallDirection = facing;
@@ -164,10 +190,11 @@ namespace FourGuardians.CourseContent.Movement
             }
 
             // 벽을 향해 공중 이동 중이면 상승/하강과 관계없이 자동으로 벽 타기 상태가 된다.
-            if (IsTouchingWall())
+            if (TryGetWallContact(out RaycastHit2D wallHit))
             {
+                AlignColliderToWall(wallHit);
                 Action = WarriorAction.WallSlide;
-                body.linearVelocity = new Vector2(body.linearVelocity.x, Mathf.Max(body.linearVelocity.y, -wallSlideSpeed));
+                body.linearVelocity = new Vector2(0f, Mathf.Max(body.linearVelocity.y, -wallSlideSpeed));
             }
             else if (body.linearVelocity.y > 1f) Action = WarriorAction.JumpUp;
             else if (body.linearVelocity.y > -1f) Action = WarriorAction.JumpToFall;
@@ -176,8 +203,12 @@ namespace FourGuardians.CourseContent.Movement
 
         private void RequestAttack()
         {
-            // 대시 도중 공격하면 별도의 대시 공격으로 연결한다.
-            if (Action == WarriorAction.Dash) Begin(WarriorAction.DashAttack, 1f);
+            // 대시 공격은 지상 대시 중에만 허용한다.
+            // 공중 대시 중 J 입력은 무시하여 공중에서 공격으로 궤도가 바뀌지 않게 한다.
+            if (Action == WarriorAction.Dash && IsGrounded)
+            {
+                Begin(WarriorAction.DashAttack, 0.45f);
+            }
             // 원본 Attack 클립은 12프레임, 총 1.2초이므로 끝까지 재생한다.
             else if (!IsLocked && IsGrounded) Begin(WarriorAction.Attack1, 1.2f);
         }
@@ -193,7 +224,17 @@ namespace FourGuardians.CourseContent.Movement
         {
             // 공격처럼 도중에 이동할 수 없는 행동은 타이머가 끝날 때까지 현재 상태를 유지한다.
             actionTimer -= Time.fixedDeltaTime;
-            if (Action is WarriorAction.Dash or WarriorAction.DashAttack) body.linearVelocity = new Vector2(facing * dashSpeed, 0f);
+            if (Action is WarriorAction.Dash or WarriorAction.DashAttack)
+            {
+                // 대시 방향이 벽으로 막히면 남은 시간을 기다리지 않고 즉시 기본 자세로 돌아간다.
+                if (IsDashPathBlocked())
+                {
+                    CancelDashToIdle();
+                    return;
+                }
+
+                body.linearVelocity = new Vector2(facing * dashSpeed, 0f);
+            }
             else if (Action == WarriorAction.Slide) body.linearVelocity = new Vector2(facing * slideSpeed, body.linearVelocity.y);
             else body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
 
@@ -206,21 +247,52 @@ namespace FourGuardians.CourseContent.Movement
             Action = IsGrounded ? WarriorAction.Idle : WarriorAction.Fall;
         }
 
+        private bool IsDashPathBlocked()
+        {
+            ContactFilter2D filter = new ContactFilter2D { useTriggers = false };
+            // 한 물리 프레임 동안 이동할 거리만큼 미리 검사하면 빠른 대시의 벽 관통을 줄일 수 있다.
+            float checkDistance = Mathf.Max(0.08f, dashSpeed * Time.fixedDeltaTime);
+            int count = bodyCollider.Cast(Vector2.right * facing, filter, hits, checkDistance);
+
+            for (int index = 0; index < count; index++)
+            {
+                if (hits[index].normal.x * facing <= -0.6f)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void CancelDashToIdle()
+        {
+            // 속도와 타이머를 함께 초기화해야 다음 입력이 이전 대시 상태의 영향을 받지 않는다.
+            actionTimer = 0f;
+            body.linearVelocity = Vector2.zero;
+            Action = WarriorAction.Idle;
+        }
+
         private void UpdateGrounded()
         {
             // Collider를 아래로 조금 투사해 발밑 바닥을 확인한다.
             ContactFilter2D filter = new ContactFilter2D { useTriggers = false };
             int count = bodyCollider.Cast(Vector2.down, filter, hits, 0.08f);
             IsGrounded = false;
+
             for (int index = 0; index < count; index++)
             {
-                if (hits[index].normal.y >= 0.6f) { IsGrounded = true; return; }
+                if (hits[index].normal.y >= 0.6f)
+                {
+                    IsGrounded = true;
+                    return;
+                }
             }
         }
 
-        private bool IsTouchingWall()
+        private bool TryGetWallContact(out RaycastHit2D wallHit)
         {
-            // 바라보는 방향으로 Collider를 조금 투사해 벽을 확인한다.
+            // CapsuleCollider 전체를 투사하므로 캐릭터 크기가 바뀌어도 몸 바깥쪽부터 벽을 검사한다.
             ContactFilter2D filter = new ContactFilter2D { useTriggers = false };
             int count = bodyCollider.Cast(Vector2.right * facing, filter, hits, 0.08f);
 
@@ -229,11 +301,27 @@ namespace FourGuardians.CourseContent.Movement
                 // 진행 방향의 반대쪽을 바라보는 수직면만 벽으로 취급한다.
                 if (hits[index].normal.x * facing <= -0.6f)
                 {
+                    wallHit = hits[index];
                     return true;
                 }
             }
 
+            wallHit = default;
             return false;
+        }
+
+        private void AlignColliderToWall(RaycastHit2D wallHit)
+        {
+            Bounds colliderBounds = bodyCollider.bounds;
+            float colliderCenterOffset = colliderBounds.center.x - body.position.x;
+
+            // 벽 표면에서 Collider 반지름만큼 떨어진 위치가 플레이어 중심이 된다.
+            // 따라서 캐릭터 크기나 Collider Offset이 달라져도 빈 공간을 고정값으로 추측하지 않는다.
+            float desiredBodyX = wallHit.point.x
+                - facing * (colliderBounds.extents.x + wallContactSkin)
+                - colliderCenterOffset;
+
+            body.position = new Vector2(desiredBodyX, body.position.y);
         }
 
         private float ReadVertical()
@@ -298,6 +386,7 @@ namespace FourGuardians.CourseContent.Movement
             }
 
             Bounds ladderBounds = currentLadder.bounds;
+            // 사다리 중앙으로 조금씩 이동시켜 진입 순간에 좌우로 순간이동하는 느낌을 줄인다.
             float centeredX = Mathf.MoveTowards(body.position.x, ladderBounds.center.x, 8f * Time.fixedDeltaTime);
             body.position = new Vector2(centeredX, body.position.y);
             body.gravityScale = 0f;
