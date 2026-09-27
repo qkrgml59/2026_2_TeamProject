@@ -7,8 +7,8 @@ namespace FourGuardians.CourseContent.Movement
     // Animator는 이 값을 읽어서 알맞은 애니메이션을 재생한다.
     public enum WarriorAction
     {
-        Idle, Run, Attack1, Attack2, Death, Hurt, JumpUp, JumpToFall, Fall,
-        Dash, DashAttack, EdgeGrab, EdgeIdle, Crouch, WallSlide, LadderGrab, Slide
+        Idle, Run, BasicAttack, Attack1, Attack2, Death, Hurt, JumpUp, JumpToFall, Fall,
+        Dash, DashAttack, JumpAttack, EdgeGrab, EdgeIdle, Crouch, WallSlide, LadderGrab, Slide
     }
 
     [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
@@ -65,8 +65,9 @@ namespace FourGuardians.CourseContent.Movement
         // Animator가 사다리 입력 여부를 확인할 수 있도록 읽기 전용으로 공개한다.
         public float VerticalInput { get; private set; }
 
-        private bool IsLocked => Action is WarriorAction.Attack1 or WarriorAction.Attack2 or WarriorAction.Hurt
-            or WarriorAction.Dash or WarriorAction.DashAttack or WarriorAction.Slide
+        private bool IsLocked => Action is WarriorAction.BasicAttack
+            or WarriorAction.Attack1 or WarriorAction.Attack2 or WarriorAction.Hurt
+            or WarriorAction.Dash or WarriorAction.DashAttack or WarriorAction.JumpAttack or WarriorAction.Slide
             or WarriorAction.EdgeGrab or WarriorAction.EdgeIdle;
 
         private void Awake()
@@ -209,8 +210,18 @@ namespace FourGuardians.CourseContent.Movement
             {
                 Begin(WarriorAction.DashAttack, 0.45f);
             }
-            // 원본 Attack 클립은 12프레임, 총 1.2초이므로 끝까지 재생한다.
-            else if (!IsLocked && IsGrounded) Begin(WarriorAction.Attack1, 1.2f);
+            // 공중에서는 별도 JumpAttack 상태를 사용하되, 원본 에셋의 Dash-Attack 모션을 재사용한다.
+            // 상태를 분리해야 공중 공격이 실제 대시 속도를 적용받지 않는다.
+            else if (!IsLocked && !IsGrounded)
+            {
+                Begin(WarriorAction.JumpAttack, 0.45f);
+            }
+            // 지상 기본 공격도 Dash-Attack 모션을 사용하지만 실제 대시 이동은 적용하지 않는다.
+            // 기존 Attack1/Attack2 상태는 이후 원소 스킬용으로 남겨둔다.
+            else if (!IsLocked && IsGrounded)
+            {
+                Begin(WarriorAction.BasicAttack, 0.45f);
+            }
         }
 
         private void Begin(WarriorAction nextAction, float duration)
@@ -235,8 +246,19 @@ namespace FourGuardians.CourseContent.Movement
 
                 body.linearVelocity = new Vector2(facing * dashSpeed, 0f);
             }
-            else if (Action == WarriorAction.Slide) body.linearVelocity = new Vector2(facing * slideSpeed, body.linearVelocity.y);
-            else body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
+            else if (Action == WarriorAction.Slide)
+            {
+                body.linearVelocity = new Vector2(facing * slideSpeed, body.linearVelocity.y);
+            }
+            else if (Action == WarriorAction.JumpAttack)
+            {
+                // 점프 공격은 현재 공중 궤도를 유지한다. 대시 공격처럼 강제 수평 속도를 주지 않는다.
+                body.linearVelocity = new Vector2(body.linearVelocity.x, body.linearVelocity.y);
+            }
+            else
+            {
+                body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
+            }
 
             if (actionTimer > 0f) return;
             if (Action == WarriorAction.EdgeGrab)

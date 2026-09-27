@@ -1,5 +1,8 @@
 using System;
+using FourGuardians.CourseContent.AI;
 using FourGuardians.CourseContent.CameraSystem;
+using FourGuardians.CourseContent.Combat;
+using FourGuardians.CourseContent.Effects;
 using FourGuardians.CourseContent.Movement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -88,6 +91,7 @@ namespace FourGuardians.CourseContent.Editor
             CreatePlatform(environment.transform, "LadderTop", new Vector2(2f, 1.25f), new Vector2(3f, 0.5f));
             CreateLadder(environment.transform);
             CreateExtendedMap(environment.transform);
+            CreateTrainingEnemy(gameplay.transform, player);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             ConfigureRunScene();
@@ -197,7 +201,127 @@ namespace FourGuardians.CourseContent.Editor
             renderer.sprite = sprites[0];
             visual.GetComponent<Animator>().runtimeAnimatorController = controller;
             visual.AddComponent<WarriorAnimatorBridge>().Configure(movement);
+
+            Health2D health = player.AddComponent<Health2D>();
+            health.Configure(8, CombatTeam.Player);
+            CreateHurtbox(player.transform, health, new Vector2(0.7f, 1.2f), new Vector2(0f, 0.6f));
+
+            DamageHitbox2D attackHitbox = CreateHitbox(
+                player.transform,
+                "Player_AttackHitbox",
+                CombatTeam.Player,
+                1,
+                new Vector2(4f, 2f),
+                new Vector2(1.15f, 1f));
+            player.AddComponent<PlayerCombat2D>().Configure(movement, attackHitbox);
+
+            ParticleSystem dashDust = CreateDashDust(player.transform);
+            player.AddComponent<DashEffect2D>().Configure(movement, renderer, dashDust);
             return player.transform;
+        }
+
+        private static void CreateHurtbox(
+            Transform parent,
+            Health2D health,
+            Vector2 size,
+            Vector2 offset)
+        {
+            GameObject hurtboxObject = new GameObject("Hurtbox", typeof(BoxCollider2D), typeof(Hurtbox2D));
+            hurtboxObject.transform.SetParent(parent, false);
+            hurtboxObject.transform.localPosition = offset;
+
+            BoxCollider2D collider = hurtboxObject.GetComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            collider.size = size;
+            hurtboxObject.GetComponent<Hurtbox2D>().Configure(health);
+        }
+
+        private static DamageHitbox2D CreateHitbox(
+            Transform parent,
+            string name,
+            CombatTeam team,
+            int damage,
+            Vector2 knockback,
+            Vector2 size)
+        {
+            GameObject hitboxObject = new GameObject(name, typeof(BoxCollider2D), typeof(DamageHitbox2D));
+            hitboxObject.transform.SetParent(parent, false);
+
+            BoxCollider2D collider = hitboxObject.GetComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            collider.size = size;
+
+            DamageHitbox2D hitbox = hitboxObject.GetComponent<DamageHitbox2D>();
+            hitbox.Configure(team, damage, knockback);
+            return hitbox;
+        }
+
+        private static ParticleSystem CreateDashDust(Transform parent)
+        {
+            GameObject dustObject = new GameObject("Dash_Dust", typeof(ParticleSystem));
+            dustObject.transform.SetParent(parent, false);
+            dustObject.transform.localPosition = new Vector3(0f, 0.12f, 0f);
+
+            ParticleSystem particles = dustObject.GetComponent<ParticleSystem>();
+            ParticleSystem.MainModule main = particles.main;
+            main.playOnAwake = false;
+            main.loop = false;
+            main.startLifetime = 0.3f;
+            main.startSpeed = 2.2f;
+            main.startSize = 0.16f;
+            main.startColor = new Color(0.45f, 0.75f, 0.85f, 0.8f);
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = 24;
+
+            ParticleSystem.EmissionModule emission = particles.emission;
+            emission.enabled = false;
+
+            ParticleSystem.ShapeModule shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Circle;
+            shape.radius = 0.12f;
+
+            ParticleSystemRenderer particleRenderer = dustObject.GetComponent<ParticleSystemRenderer>();
+            particleRenderer.sortingOrder = 3;
+            return particles;
+        }
+
+        private static void CreateTrainingEnemy(Transform parent, Transform player)
+        {
+            GameObject enemy = new GameObject("TrainingEnemy", typeof(Rigidbody2D), typeof(CapsuleCollider2D));
+            enemy.transform.SetParent(parent);
+            enemy.transform.position = new Vector3(12f, -1.95f, 0f);
+
+            Rigidbody2D body = enemy.GetComponent<Rigidbody2D>();
+            body.freezeRotation = true;
+            body.gravityScale = 3f;
+            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+            CapsuleCollider2D bodyCollider = enemy.GetComponent<CapsuleCollider2D>();
+            bodyCollider.size = new Vector2(0.8f, 1.3f);
+            bodyCollider.offset = new Vector2(0f, 0.65f);
+
+            GameObject visualObject = new GameObject("Visual", typeof(SpriteRenderer));
+            visualObject.transform.SetParent(enemy.transform, false);
+            visualObject.transform.localPosition = new Vector3(0f, 0.65f, 0f);
+            SpriteRenderer visual = visualObject.GetComponent<SpriteRenderer>();
+            visual.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
+            visual.color = new Color(0.72f, 0.2f, 0.28f);
+            visual.drawMode = SpriteDrawMode.Sliced;
+            visual.size = new Vector2(0.8f, 1.3f);
+            visual.sortingOrder = 1;
+
+            Health2D health = enemy.AddComponent<Health2D>();
+            health.Configure(4, CombatTeam.Enemy);
+            CreateHurtbox(enemy.transform, health, new Vector2(0.8f, 1.3f), new Vector2(0f, 0.65f));
+
+            DamageHitbox2D enemyHitbox = CreateHitbox(
+                enemy.transform,
+                "Enemy_AttackHitbox",
+                CombatTeam.Enemy,
+                1,
+                new Vector2(3f, 1.5f),
+                new Vector2(0.9f, 0.9f));
+            enemy.AddComponent<EnemyCombatAI2D>().Configure(player, enemyHitbox, visual);
         }
 
         private static Sprite[] LoadSprites()

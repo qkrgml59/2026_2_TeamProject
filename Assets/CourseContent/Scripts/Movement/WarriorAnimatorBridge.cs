@@ -61,7 +61,9 @@ namespace FourGuardians.CourseContent.Movement
                 // 0.7초짜리 원본 대시를 약 0.28초 안에 끝까지 보여준다.
                 animator.speed = 2.5f;
             }
-            else if (movement.Action == WarriorAction.DashAttack)
+            else if (movement.Action is WarriorAction.BasicAttack
+                or WarriorAction.DashAttack
+                or WarriorAction.JumpAttack)
             {
                 // 1초짜리 대시 공격도 액션 시간에 맞춰 빠르게 재생한다.
                 animator.speed = 2.2f;
@@ -91,6 +93,7 @@ namespace FourGuardians.CourseContent.Movement
             {
                 WarriorAction.Idle => "Idle",
                 WarriorAction.Run => "Run",
+                WarriorAction.BasicAttack => "Dash-Attack",
                 WarriorAction.Attack1 => "Attack",
                 WarriorAction.Attack2 => "Attack",
                 WarriorAction.Death => "Death NoEffect",
@@ -100,6 +103,7 @@ namespace FourGuardians.CourseContent.Movement
                 WarriorAction.Fall => "Fall",
                 WarriorAction.Dash => "Dash",
                 WarriorAction.DashAttack => "Dash-Attack",
+                WarriorAction.JumpAttack => "Dash-Attack",
                 WarriorAction.EdgeGrab => "Edge-Grab",
                 WarriorAction.EdgeIdle => "Edge-Idle",
                 WarriorAction.Crouch => "Croush",
