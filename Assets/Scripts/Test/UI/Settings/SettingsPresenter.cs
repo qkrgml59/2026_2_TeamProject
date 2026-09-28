@@ -10,7 +10,10 @@ public class SettingsPresenter
 
     private InputActionAsset inputActions;
     private AudioMixer audioMixer;
+
     private Resolution[] availableResolutions;
+    private List<Vector2Int> uniqueResolutions;      
+    private List<RefreshRate> supportedRefreshRates;
 
     public SettingsPresenter(SettingsModel model, SettingsView view, InputActionAsset inputActions, AudioMixer audioMixer)
     {
@@ -21,6 +24,7 @@ public class SettingsPresenter
 
         // Display
         view.OnResolutionChanged += HandleResolutionChanged;
+        view.OnFrameRateChanged += HandleFrameRateChanged;
         view.OnFullscreenChanged += HandleFullscreenChanged;
 
         // Audio
@@ -41,28 +45,36 @@ public class SettingsPresenter
     {
         model.LoadSettings();
 
-        availableResolutions = Screen.resolutions;
-        List<string> options = new List<string>();
+        uniqueResolutions = new List<Vector2Int>();
+        List<string> resOptions = new List<string>();
         int currentResIndex = 0;
 
-        for (int i = 0; i < availableResolutions.Length; i++)
+        foreach (var res in Screen.resolutions)
         {
-            string option = $"{availableResolutions[i].width} x {availableResolutions[i].height} @ {availableResolutions[i].refreshRateRatio.value:F0}Hz";
-            options.Add(option);
-
-            if (model.resolutionIndex == -1 &&
-                availableResolutions[i].width == Screen.currentResolution.width &&
-                availableResolutions[i].height == Screen.currentResolution.height)
+            Vector2Int size = new Vector2Int(res.width, res.height);
+            if (!uniqueResolutions.Contains(size))
             {
-                currentResIndex = i;
-                model.resolutionIndex = currentResIndex;
+                uniqueResolutions.Add(size);
+                resOptions.Add($"{size.x} x {size.y}");
+
+                if (model.resolutionIndex == -1 && size.x == Screen.currentResolution.width && size.y == Screen.currentResolution.height)
+                {
+                    currentResIndex = uniqueResolutions.Count - 1;
+                    model.resolutionIndex = currentResIndex;
+                }
             }
         }
 
         if (model.resolutionIndex != -1) currentResIndex = model.resolutionIndex;
 
-        view.InitializeResolutionOptions(options);
+        view.InitializeResolutionOptions(resOptions);
         view.UpdateDisplayUI(currentResIndex, model.isFullscreen);
+
+
+        List<string> frameRateOptions = new List<string> { "30 FPS", "60 FPS", "120 FPS", "무제한" };
+        view.InitializeFrameRateOptions(frameRateOptions);
+        view.UpdateFrameRateUI(model.frameRateIndex);
+        ApplyTargetFrameRate(model.frameRateIndex); 
 
         view.UpdateVolumeUI(model.masterVolume, model.bgmVolume, model.sfxVolume);
         ApplyAudioMixer("MasterVolumeParam", model.masterVolume);
@@ -70,8 +82,35 @@ public class SettingsPresenter
         ApplyAudioMixer("SFXVolumeParam", model.sfxVolume);
     }
 
-    private void HandleResolutionChanged(int index) { model.resolutionIndex = index; }
-    private void HandleFullscreenChanged(bool isFull) { model.isFullscreen = isFull; }
+    private void HandleResolutionChanged(int index)
+    {
+        model.resolutionIndex = index;
+    }
+
+    private void HandleFrameRateChanged(int index)
+    {
+        model.frameRateIndex = index;
+    }
+
+    private void HandleFullscreenChanged(bool isFull)
+    { 
+        model.isFullscreen = isFull; 
+    }
+
+    private void ApplyTargetFrameRate(int index)
+    {
+        QualitySettings.vSyncCount = 0;
+
+        int targetFPS = index switch
+        {
+            0 => 30,
+            1 => 60,
+            2 => 120,
+            _ => -1 // -1은 무제한
+        };
+
+        Application.targetFrameRate = targetFPS;
+    }
 
     private void HandleMasterVolumeChanged(float volume)
     {
@@ -98,10 +137,12 @@ public class SettingsPresenter
     {
         model.SaveSettings();
 
-        Resolution res = availableResolutions[model.resolutionIndex];
-        Screen.SetResolution(res.width, res.height, model.isFullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
+        Vector2Int size = uniqueResolutions[model.resolutionIndex];
+        Screen.SetResolution(size.x, size.y, model.isFullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
 
-        Debug.Log("설정 적용 및 저장 완료");
+        ApplyTargetFrameRate(model.frameRateIndex);
+
+        Debug.Log("설정 적용 완료");
     }
 
     private void HandleCloseClicked()

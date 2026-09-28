@@ -9,6 +9,7 @@ public class SettingsView : MonoBehaviour
 {
     [Header("Display")]
     [SerializeField] private TMP_Dropdown resolutionDropdown;
+    [SerializeField] private TMP_Dropdown frameRateDropdown;
     [SerializeField] private Toggle fullscreenToggle;
 
     [Header("Audio")]
@@ -31,10 +32,13 @@ public class SettingsView : MonoBehaviour
 
 
     public event Action<int> OnResolutionChanged;
+    public event Action<int> OnFrameRateChanged;
     public event Action<bool> OnFullscreenChanged;
+
     public event Action<float> OnMasterVolumeChanged;
     public event Action<float> OnBGMVolumeChanged;
     public event Action<float> OnSFXVolumeChanged;
+
     public event Action OnApplyClicked;
     public event Action OnCloseClicked;
 
@@ -43,6 +47,7 @@ public class SettingsView : MonoBehaviour
     private void Awake()
     {
         resolutionDropdown.onValueChanged.AddListener(val => { if (!isInitializing) OnResolutionChanged?.Invoke(val); });
+        frameRateDropdown.onValueChanged.AddListener(val => { if (!isInitializing) OnFrameRateChanged?.Invoke(val); });
         fullscreenToggle.onValueChanged.AddListener(val => { if (!isInitializing) OnFullscreenChanged?.Invoke(val); });
 
         masterVolumeSlider.onValueChanged.AddListener(val => { if (!isInitializing) OnMasterVolumeChanged?.Invoke(val); });
@@ -69,6 +74,19 @@ public class SettingsView : MonoBehaviour
         }
 
         fullscreenToggle.isOn = isFull;
+        isInitializing = false;
+    }
+
+    public void InitializeFrameRateOptions(List<string> options)
+    {
+        frameRateDropdown.ClearOptions();
+        frameRateDropdown.AddOptions(options);
+    }
+
+    public void UpdateFrameRateUI(int index)
+    {
+        isInitializing = true;
+        frameRateDropdown.value = index;
         isInitializing = false;
     }
 

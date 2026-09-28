@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/CourseContent/Scenes/BasicMovement.unity
     guid: d1552d819c1422c4f83722d924ebdb3b
   - enabled: 1
+    path: Assets/Scenes/Mainmenu.unity
+    guid: 270fcb1ab0b9d204f80e336edab3358a
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
