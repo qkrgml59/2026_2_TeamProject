@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
@@ -32,8 +33,42 @@ public class SettingsPresenter
         // System
         view.OnApplyClicked += HandleApplyClicked;
         view.OnCloseClicked += HandleCloseClicked;                                         // (기존 코드 생략)
+
+        InitializeSystem();
     }
 
+    private void InitializeSystem()
+    {
+        model.LoadSettings();
+
+        availableResolutions = Screen.resolutions;
+        List<string> options = new List<string>();
+        int currentResIndex = 0;
+
+        for (int i = 0; i < availableResolutions.Length; i++)
+        {
+            string option = $"{availableResolutions[i].width} x {availableResolutions[i].height} @ {availableResolutions[i].refreshRateRatio.value:F0}Hz";
+            options.Add(option);
+
+            if (model.resolutionIndex == -1 &&
+                availableResolutions[i].width == Screen.currentResolution.width &&
+                availableResolutions[i].height == Screen.currentResolution.height)
+            {
+                currentResIndex = i;
+                model.resolutionIndex = currentResIndex;
+            }
+        }
+
+        if (model.resolutionIndex != -1) currentResIndex = model.resolutionIndex;
+
+        view.InitializeResolutionOptions(options);
+        view.UpdateDisplayUI(currentResIndex, model.isFullscreen);
+
+        view.UpdateVolumeUI(model.masterVolume, model.bgmVolume, model.sfxVolume);
+        ApplyAudioMixer("MasterVolumeParam", model.masterVolume);
+        ApplyAudioMixer("BGMVolumeParam", model.bgmVolume);
+        ApplyAudioMixer("SFXVolumeParam", model.sfxVolume);
+    }
 
     private void HandleResolutionChanged(int index) { model.resolutionIndex = index; }
     private void HandleFullscreenChanged(bool isFull) { model.isFullscreen = isFull; }

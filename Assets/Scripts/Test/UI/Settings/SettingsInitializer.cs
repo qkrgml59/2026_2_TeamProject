@@ -20,16 +20,36 @@ public class SettingsInitializer : MonoBehaviour
         settingsView.gameObject.SetActive(false);
     }
 
-    public void OpenSettings()
+    private void Update()
     {
-        settingsView.Show();
+        // 설정 체크용 임시
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            ToggleSettings();
+        }
     }
 
-    public void CloseSettings()
+    public void ToggleSettings()
     {
         if (settingsView.gameObject.activeInHierarchy)
         {
             settingsView.Hide();
         }
+        else
+        {
+            settingsView.Show();
+        }
+    }
+
+    public void OpenSettings()
+    {
+        if (!settingsView.gameObject.activeInHierarchy)
+            settingsView.Show();
+    }
+
+    public void CloseSettings()
+    {
+        if (settingsView.gameObject.activeInHierarchy)
+            settingsView.Hide();
     }
 }
