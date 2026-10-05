@@ -1,3 +1,4 @@
+using Puzzle.Sequence;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -439,9 +440,18 @@ namespace Player.Move
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            //공격받은 오브젝트에서 SequencePuzzleObject 컴포넌트를 가져옴
+            //TODO : 나중에 다른 기믹들도 때려서 진행되는 거라면 통합되게 만들어야 할 듯
+            if (other.TryGetComponent<SequencePuzzleObject>(out var puzzleObj))
+            {
+                puzzleObj.OnAttacked(); // 피격 호출
+            }
+
             if (!other.name.Contains("Ladder")) return;
             nearLadder = true;
             currentLadder = other;
+
+            
         }
 
         private void OnTriggerExit2D(Collider2D other)

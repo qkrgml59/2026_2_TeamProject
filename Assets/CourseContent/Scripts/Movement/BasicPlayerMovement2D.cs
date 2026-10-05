@@ -1,3 +1,5 @@
+using DG.Tweening;
+using Puzzle.Sequence;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -434,6 +436,18 @@ namespace FourGuardians.CourseContent.Movement
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            if(other.TryGetComponent<SequencePuzzleObject>(out var puzzleObj))
+            {
+                //플레이어가 일반 공격 상태일때만 작동
+                bool isAttacking = Action is WarriorAction.BasicAttack;
+                
+                if(isAttacking)
+                {
+                    puzzleObj.OnAttacked();
+                }
+                
+            }
+
             if (!other.name.Contains("Ladder")) return;
             nearLadder = true;
             currentLadder = other;
