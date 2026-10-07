@@ -436,16 +436,34 @@ namespace FourGuardians.CourseContent.Movement
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if(other.TryGetComponent<SequencePuzzleObject>(out var puzzleObj))
+            Debug.Log($"[로그 1] 충돌 발생! 충돌 대상: {other.gameObject.name}");
+
+            bool isAttacking = Action is WarriorAction.BasicAttack or WarriorAction.JumpAttack or WarriorAction.DashAttack;
+
+            if (!isAttacking)
             {
-                //플레이어가 일반 공격 상태일때만 작동
-                bool isAttacking = Action is WarriorAction.BasicAttack;
-                
-                if(isAttacking)
-                {
-                    puzzleObj.OnAttacked();
-                }
-                
+                Debug.Log($"[로그 2] 충돌은 했지만 플레이어가 공격 상태가 아닙니다. (현재 상태: {Action})");
+                return;
+            }
+
+            Debug.Log("[로그 2] 플레이어 공격 상태 확인 완료!");
+
+            //기존 순서 퍼즐 피격
+            if (other.TryGetComponent<Puzzle.Sequence.SequencePuzzleObject>(out var seqObj))
+            {
+                seqObj.OnAttacked();
+            }
+
+            //회전 퍼즐 피격 (부모에 있는 RotationPuzzle 탐색)
+            var rotationPuzzle = other.GetComponentInParent<Gimmick.RotationPuzzle.RotationPuzzle>();
+            if (rotationPuzzle != null)
+            {
+                Debug.Log($"[로그 3] {other.gameObject.name}에서 RotationPuzzle을 찾았습니다! CheckPuzzle 호출");
+                rotationPuzzle.CheckPuzzle(other.transform);
+            }
+            else
+            {
+                Debug.LogWarning($"[로그 3 실패] {other.gameObject.name} 또는 그 부모에서 RotationPuzzle 스크립트를 찾지 못했습니다.");
             }
 
             if (!other.name.Contains("Ladder")) return;
