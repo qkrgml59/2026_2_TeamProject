@@ -210,6 +210,58 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &43155527
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 43155529}
+  - component: {fileID: 43155528}
+  m_Layer: 0
+  m_Name: MazePuzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &43155528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43155527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27a11c62560359543b99bddcc80748ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gimmick.MazePuzzle.MazePuzzle
+  movingObject: {fileID: 0}
+  moveSpeed: 3
+  currentAxis: 0
+  moveDirection: 1
+  switchPad1: {fileID: 0}
+  switchPad2: {fileID: 0}
+  targetButton: {fileID: 0}
+  targetDoor: {fileID: 0}
+--- !u!4 &43155529
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43155527}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -25.33924, y: -1.32756, z: 0.36874}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &140928884
 GameObject:
   m_ObjectHideFlags: 0
@@ -315,7 +367,6 @@ GameObject:
   - component: {fileID: 145168820}
   - component: {fileID: 145168819}
   - component: {fileID: 145168818}
-  - component: {fileID: 145168817}
   m_Layer: 0
   m_Name: RotationPuzzleObject_3
   m_TagString: Untagged
@@ -323,20 +374,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &145168817
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 145168816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5626326cd3118349a2b563058cd25e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Gimmick.RotationPuzzle.RotationPuzzleObject
-  ownerPuzzle: {fileID: 0}
-  currentZAngle: 0
 --- !u!61 &145168818
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -451,7 +488,7 @@ Transform:
   m_GameObject: {fileID: 145168816}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.49, y: -0.03, z: 0}
+  m_LocalPosition: {x: -21.17, y: -0.96, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1592,6 +1629,7 @@ GameObject:
   m_Component:
   - component: {fileID: 653525234}
   - component: {fileID: 653525233}
+  - component: {fileID: 653525235}
   m_Layer: 0
   m_Name: RotationPuzzle
   m_TagString: Untagged
@@ -1612,12 +1650,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Gimmick.RotationPuzzle.RotationPuzzle
   puzzleObjects:
-  - {fileID: 688470764}
-  - {fileID: 805067877}
-  - {fileID: 145168817}
+  - {fileID: 688470767}
+  - {fileID: 805067880}
+  - {fileID: 145168820}
   rotationAngle: 90
   targetDoor: {fileID: 1475208421}
-  isSolved: 0
 --- !u!4 &653525234
 Transform:
   m_ObjectHideFlags: 0
@@ -1627,7 +1664,7 @@ Transform:
   m_GameObject: {fileID: 653525232}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15.54, y: -0.87, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1637,6 +1674,52 @@ Transform:
   - {fileID: 1475208424}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &653525235
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 653525232}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &688470763
 GameObject:
   m_ObjectHideFlags: 0
@@ -1648,7 +1731,6 @@ GameObject:
   - component: {fileID: 688470767}
   - component: {fileID: 688470766}
   - component: {fileID: 688470765}
-  - component: {fileID: 688470764}
   m_Layer: 0
   m_Name: RotationPuzzleObject_1
   m_TagString: Untagged
@@ -1656,20 +1738,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &688470764
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 688470763}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5626326cd3118349a2b563058cd25e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Gimmick.RotationPuzzle.RotationPuzzleObject
-  ownerPuzzle: {fileID: 0}
-  currentZAngle: 0
 --- !u!61 &688470765
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1784,7 +1852,7 @@ Transform:
   m_GameObject: {fileID: 688470763}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
-  m_LocalPosition: {x: 8.07, y: 0, z: 0}
+  m_LocalPosition: {x: -24.59, y: -0.93, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6637,7 +6705,6 @@ GameObject:
   - component: {fileID: 805067880}
   - component: {fileID: 805067879}
   - component: {fileID: 805067878}
-  - component: {fileID: 805067877}
   m_Layer: 0
   m_Name: RotationPuzzleObject_2
   m_TagString: Untagged
@@ -6645,20 +6712,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &805067877
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 805067876}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5626326cd3118349a2b563058cd25e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Gimmick.RotationPuzzle.RotationPuzzleObject
-  ownerPuzzle: {fileID: 0}
-  currentZAngle: 0
 --- !u!61 &805067878
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6773,7 +6826,7 @@ Transform:
   m_GameObject: {fileID: 805067876}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 9.87, y: 0.01, z: 0}
+  m_LocalPosition: {x: -22.79, y: -0.92, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8583,7 +8636,7 @@ Transform:
   m_GameObject: {fileID: 1475208420}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.96, y: 0.24000001, z: 0}
+  m_LocalPosition: {x: -27.7, y: -0.69, z: 0}
   m_LocalScale: {x: 1, y: 2.59, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10019,3 +10072,4 @@ SceneRoots:
   - {fileID: 1879120941}
   - {fileID: 1698329160}
   - {fileID: 653525234}
+  - {fileID: 43155529}
