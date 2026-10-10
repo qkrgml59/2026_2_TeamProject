@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
-public class SettingsView : MonoBehaviour
+public class SettingsView : UIPanel
 {
     [Header("Display")]
     [SerializeField] private TMP_Dropdown resolutionDropdown;
@@ -24,12 +23,8 @@ public class SettingsView : MonoBehaviour
 
     //[Header("Key Binding")]
 
-
     [Header("System")]
-    [SerializeField] private Button applyButton;
     [SerializeField] private Button closeButton;
-    [SerializeField] private CanvasGroup canvasGroup;
-
 
     public event Action<int> OnResolutionChanged;
     public event Action<int> OnFrameRateChanged;
@@ -39,8 +34,8 @@ public class SettingsView : MonoBehaviour
     public event Action<float> OnBGMVolumeChanged;
     public event Action<float> OnSFXVolumeChanged;
 
-    public event Action OnApplyClicked;
-    public event Action OnCloseClicked;
+    // 설정창이 닫힐 때 (저장 대기 중인 값 저장용)
+    public event Action OnHidden;
 
     private bool isInitializing = false;
 
@@ -54,8 +49,15 @@ public class SettingsView : MonoBehaviour
         bgmVolumeSlider.onValueChanged.AddListener(val => { if (!isInitializing) OnBGMVolumeChanged?.Invoke(val); });
         sfxVolumeSlider.onValueChanged.AddListener(val => { if (!isInitializing) OnSFXVolumeChanged?.Invoke(val); });
 
-        applyButton.onClick.AddListener(() => OnApplyClicked?.Invoke());
-        closeButton.onClick.AddListener(() => OnCloseClicked?.Invoke());
+        // 닫기 처리는 패널을 연 쪽(PauseMenuController)이 결정
+        // 메인메뉴: 설정창 닫기 / 인게임: 일시정지 메뉴로 돌아가기
+        closeButton.onClick.AddListener(RequestClose);
+    }
+
+    public override void Hide()
+    {
+        base.Hide();
+        OnHidden?.Invoke();
     }
 
     public void InitializeResolutionOptions(List<string> options)
@@ -69,9 +71,7 @@ public class SettingsView : MonoBehaviour
         isInitializing = true;
 
         if (resIndex >= 0)
-        {
             resolutionDropdown.value = resIndex;
-        }
 
         fullscreenToggle.isOn = isFull;
         isInitializing = false;
@@ -104,21 +104,5 @@ public class SettingsView : MonoBehaviour
         sfxVolumeText.text = $"{Mathf.RoundToInt(sfx * 100)}%";
 
         isInitializing = false;
-    }
-
-    public void Show()
-    {
-        gameObject.SetActive(true);
-        canvasGroup.alpha = 0f;
-        transform.localScale = Vector3.one * .9f;
-
-        canvasGroup.DOFade(1f, .25f);
-        transform.DOScale(1f, .25f).SetEase(Ease.OutBack);
-    }
-
-    public void Hide()
-    {
-        canvasGroup.DOFade(0f, .2f);
-        transform.DOScale(.9f, .2f).SetEase(Ease.InBack).OnComplete(() => gameObject.SetActive(false));
     }
 }

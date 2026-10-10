@@ -4,7 +4,6 @@ using UnityEngine.InputSystem;
 
 public class SettingsInitializer : MonoBehaviour
 {
-    [Header("References")]
     [SerializeField] private SettingsView settingsView;
     [SerializeField] private InputActionAsset inputActions;
     [SerializeField] private AudioMixer audioMixer;
@@ -14,42 +13,13 @@ public class SettingsInitializer : MonoBehaviour
     private void Start()
     {
         SettingsModel model = new SettingsModel();
-
         presenter = new SettingsPresenter(model, settingsView, inputActions, audioMixer);
-
-        settingsView.gameObject.SetActive(false);
+        // 패널 표시/숨김은 PauseMenuController가 담당
     }
 
-    private void Update()
+    // 볼륨 조절 직후 0.5초 안에 게임을 종료해도 저장되도록
+    private void OnApplicationQuit()
     {
-        // 설정 체크용 임시
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            ToggleSettings();
-        }
-    }
-
-    public void ToggleSettings()
-    {
-        if (settingsView.gameObject.activeInHierarchy)
-        {
-            settingsView.Hide();
-        }
-        else
-        {
-            settingsView.Show();
-        }
-    }
-
-    public void OpenSettings()
-    {
-        if (!settingsView.gameObject.activeInHierarchy)
-            settingsView.Show();
-    }
-
-    public void CloseSettings()
-    {
-        if (settingsView.gameObject.activeInHierarchy)
-            settingsView.Hide();
+        presenter?.FlushSave();
     }
 }
