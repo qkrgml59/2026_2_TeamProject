@@ -1,94 +1,141 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gimmick.SafePlatform
 {
+    public enum PuzzleMode
+    {
+        SingleTarget,
+        Sequence
+    }
+
     public class SafePlatformPuzzle : MonoBehaviour
     {
-        [Header("발판 오브젝트 목록")]
-        [Tooltip("퍼즐에 사용할 모든 발판의 Collider2D를 Inspector에서 드래그하여 등록하세요.")]
+        [Header("퍼즐 작동 방식 선택")]
+        [SerializeField] private PuzzleMode puzzleMode = PuzzleMode.Sequence;
+
+        [Header(" 발판 오브젝트 목록")]
         [SerializeField] private List<Collider2D> platformColliders = new List<Collider2D>();
 
-        [Header("정답 순서 설정 (인덱스)")]
-        [Tooltip("platformColliders 목록의 Element 번호(0부터 시작)를 정답 순서대로 적어주세요. 예: 0 -> 2 -> 1")]
+        [Header("[단일 모드용] 정답 발판")]
+        [SerializeField] private Collider2D singleCorrectPlatform;
+
+        [Header("[순서 모드용] 정답 순서 (인덱스)")]
         [SerializeField] private List<int> correctSequence = new List<int>();
 
         [Header("연결된 문")]
-        [Tooltip("퍼즐 클리어 시 열릴 문 오브젝트")]
         [SerializeField] private Door targetDoor;
 
-        private int currentStep = 0;      //현재 진행 중인 정답 단계 (0부터 시작)
-        private bool isSolved = false;    //퍼즐 성공 여부
+        [Header("실패 시 플레이어 리셋 위치 (선택)")]
+        [SerializeField] private Transform resetPoint;
 
-        //발판 중복 감지 방지용 (이전에 감지한 발판 저장)
-        private Collider2D lastSteppedPlatform = null;
+        [Header("발판 연출 설정")]
+        [Tooltip("밟았을 때 내려갈 Y축 깊이")]
+        [SerializeField] private float pressDepth = 0.15f;
+
+        [Tooltip("발판 복귀/하강 속도")]
+        [SerializeField] private float moveSpeed = 10f;
+
+        private int currentStep = 0;
+        private bool isSolved = false;
+
+        private Collider2D currentPressedPlatform = null; 
+        private Collider2D lastHandledPlatform = null;    
+
+        private List<Vector3> originPositions = new List<Vector3>();
 
         private void Start()
         {
             ValidateSettings();
+
+            //시작할 때 각 발판의 원래 초기 위치 보관
+            originPositions.Clear();
+            foreach (var pad in platformColliders)
+            {
+                if (pad != null)
+                {
+                    originPositions.Add(pad.transform.position);
+                }
+            }
         }
 
         private void ValidateSettings()
         {
             if (platformColliders == null || platformColliders.Count == 0)
-            {
-                Debug.LogWarning($"[{gameObject.name}] 등록된 발판(Platform Colliders)이 없습니다!");
-            }
+                Debug.LogWarning($"[{gameObject.name}] 등록된 발판이 없습니다!");
 
-            if (correctSequence == null || correctSequence.Count == 0)
-            {
-                Debug.LogWarning($"[{gameObject.name}] 정답 순서(Correct Sequence)가 설정되지 않았습니다!");
-            }
-            else
-            {
-                //정답 인덱스 범위 예외 검사
-                for (int i = 0; i < correctSequence.Count; i++)
-                {
-                    int index = correctSequence[i];
-                    if (index < 0 || index >= platformColliders.Count)
-                    {
-                        Debug.LogWarning($"[{gameObject.name}] correctSequence[{i}]의 값({index})이 발판 목록 범위를 벗어났습니다!");
-                    }
-                }
-            }
+            if (puzzleMode == PuzzleMode.SingleTarget && singleCorrectPlatform == null)
+                Debug.LogWarning($"[{gameObject.name}] SingleTarget 모드이나 'Single Correct Platform'이 설정되지 않았습니다!");
+
+            if (puzzleMode == PuzzleMode.Sequence && (correctSequence == null || correctSequence.Count == 0))
+                Debug.LogWarning($"[{gameObject.name}] Sequence 모드이나 'Correct Sequence'가 설정되지 않았습니다!");
 
             if (targetDoor == null)
-            {
                 Debug.LogWarning($"[{gameObject.name}] 연결된 Target Door가 없습니다!");
-            }
         }
 
         private void Update()
         {
-            if (isSolved || platformColliders.Count == 0 || correctSequence.Count == 0) return;
+            AnimatePlatforms();
 
+            if (isSolved || platformColliders.Count == 0) return;
 
             CheckPlatformStepped();
         }
 
-        //플레이어가 발판 영역 안으로 들어왔는지 Overlap으로 감지
+        //발판 위치 보간 연출
+        private void AnimatePlatforms()
+        {
+            for (int i = 0; i < platformColliders.Count; i++)
+            {
+                var pad = platformColliders[i];
+                if (pad == null || i >= originPositions.Count) continue;
+
+                Vector3 targetPos = originPositions[i];
+
+                // 현재 플레이어가 밟고 있는 발판이면 아래로 낮춤
+                if (pad == currentPressedPlatform)
+                {
+                    targetPos.y -= pressDepth;
+                }
+
+                pad.transform.position = Vector3.Lerp(pad.transform.position, targetPos, Time.deltaTime * moveSpeed);
+            }
+        }
+
         private void CheckPlatformStepped()
         {
-            Collider2D currentStepped = GetSteppedPlatform();
+            //플레이어와 현재 밟힌 발판 가져오기
+            var (steppedPad, playerTransform) = GetSteppedPlatformAndPlayer();
 
-            if (currentStepped == null)
+            currentPressedPlatform = steppedPad;
+
+            //아무 발판도 안 밟고 있으면 판정 기록 초기화
+            if (steppedPad == null)
             {
-                lastSteppedPlatform = null;
+                lastHandledPlatform = null;
                 return;
             }
 
-            //동일한 발판에 서 있는 동안 중복 반응 방지
-            if (currentStepped == lastSteppedPlatform) return;
+            //동일 발판에 서 있는 동안 중복 판정 방지
+            if (steppedPad == lastHandledPlatform) return;
 
-            //새로운 발판을 밟았을 때
-            lastSteppedPlatform = currentStepped;
-            int steppedIndex = platformColliders.IndexOf(currentStepped);
+            lastHandledPlatform = steppedPad;
+            int steppedIndex = platformColliders.IndexOf(steppedPad);
 
-            OnPlatformStepped(steppedIndex, currentStepped);
+            if (puzzleMode == PuzzleMode.SingleTarget)
+            {
+                ProcessSingleMode(steppedPad, playerTransform);
+            }
+            else if (puzzleMode == PuzzleMode.Sequence)
+            {
+                ProcessSequenceMode(steppedIndex, steppedPad, playerTransform);
+            }
         }
 
-        //현재 밟은 발판의 Collider2D 반환
-        private Collider2D GetSteppedPlatform()
+        //밟고 있는 발판과 플레이어 Transform을 함께 찾아 반환
+        private (Collider2D pad, Transform player) GetSteppedPlatformAndPlayer()
         {
             Collider2D[] results = new Collider2D[5];
             ContactFilter2D filter = new ContactFilter2D { useTriggers = true };
@@ -100,66 +147,89 @@ namespace Gimmick.SafePlatform
                 int count = pad.Overlap(filter, results);
                 for (int i = 0; i < count; i++)
                 {
-                    //밟은 대상이 플레이어인지 확인
                     if (results[i] != null && (results[i].CompareTag("Player") || results[i].GetComponentInParent<Player.Move.PlayerMoveMent>() != null))
                     {
-                        return pad;
+                        return (pad, results[i].transform);
                     }
                 }
             }
 
-            return null;
+            return (null, null);
         }
 
-        //발판을 밟았을 때 정답/오답 처리
-        private void OnPlatformStepped(int platformIndex, Collider2D platformCollider)
+        private void ProcessSingleMode(Collider2D steppedPlatform, Transform playerTransform)
+        {
+            if (steppedPlatform == singleCorrectPlatform)
+            {
+                Debug.Log($"[{gameObject.name}] 정답 발판!");
+                SolvePuzzle();
+            }
+            else
+            {
+                Debug.Log($"[{gameObject.name}] 오답 발판!");
+                ResetPuzzleProgress(playerTransform);
+            }
+        }
+
+        private void ProcessSequenceMode(int platformIndex, Collider2D platformCollider, Transform playerTransform)
         {
             int expectedIndex = correctSequence[currentStep];
 
-            //이미 맞춘 단계를 동일한 발판으로 재방문했을 경우
-            //(예: 1번 발판(정답) -> 2번 발판(정답) 진행 후 다시 1번 발판을 밟는 경우 안전하게 유지 또는 무시)
             if (currentStep > 0 && correctSequence[currentStep - 1] == platformIndex)
             {
-                Debug.Log($"[{gameObject.name}] 직전에 맞춘 안전 발판({platformIndex}번)을 다시 밟았습니다. 상태 유지.");
+                Debug.Log($"[{gameObject.name}] 직전에 맞춘 발판 재방문. 상태 유지.");
                 return;
             }
 
-            //정답 발판을 올바르게 밟은 경우
             if (platformIndex == expectedIndex)
             {
                 currentStep++;
-                Debug.Log($"[{gameObject.name}] 정답 발판! ({platformIndex}번 발판) -> 진행 단계: {currentStep}/{correctSequence.Count}");
+                Debug.Log($"[{gameObject.name}] 정답 발판! ({platformIndex}번) -> 단계: {currentStep}/{correctSequence.Count}");
 
-                //모든 정답 순서를 순서대로 맞췄다면 성공
                 if (currentStep >= correctSequence.Count)
                 {
                     SolvePuzzle();
                 }
             }
-            //틀린 발판을 밟은 경우 (초기화)
             else
             {
-                Debug.LogWarning($"[{gameObject.name}] 오답 발판! ({platformIndex}번 발판) -> 진행 상황이 초기화됩니다.");
-                ResetPuzzleProgress();
+                Debug.LogWarning($"[{gameObject.name}] 오답 발판! ({platformIndex}번) -> 진행 상황 초기화 및 순간이동!");
+                ResetPuzzleProgress(playerTransform);
             }
         }
 
-        //진행 상황 초기화
-        private void ResetPuzzleProgress()
+        private void ResetPuzzleProgress(Transform playerTransform)
         {
             currentStep = 0;
-            lastSteppedPlatform = null;
+            lastHandledPlatform = null;
+            currentPressedPlatform = null; 
+
+            //텔레포트 처리
+            if (resetPoint != null && playerTransform != null)
+            {
+                //플레이어 부모/본체 Rigidbody2D 속도 초기화
+                Rigidbody2D playerRb = playerTransform.GetComponentInParent<Rigidbody2D>();
+                if (playerRb != null)
+                {
+                    playerRb.linearVelocity = Vector2.zero;
+                }
+
+                //리셋 지점으로 이동
+                Transform targetMoveTransform = playerTransform.GetComponentInParent<Player.Move.PlayerMoveMent>()?.transform ?? playerTransform;
+                targetMoveTransform.position = resetPoint.position;
+
+                Debug.Log($"[{gameObject.name}] 플레이어를 리셋 위치({resetPoint.position})로 순간이동시켰습니다.");
+            }
         }
 
-        //퍼즐 성공 처리
         private void SolvePuzzle()
         {
             isSolved = true;
-            Debug.Log($"[{gameObject.name}] 안전 발판 퍼즐 성공! 문을 엽니다.");
+            Debug.Log($"[{gameObject.name}] 퍼즐 클리어! 문을 엽니다.");
 
             if (targetDoor != null)
             {
-                targetDoor.Open(); 
+                targetDoor.Open();
             }
         }
     }

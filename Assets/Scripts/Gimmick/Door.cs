@@ -17,6 +17,9 @@ namespace Gimmick
         [SerializeField] private Collider2D doorCollider;
 
         private bool isOpen = false;
+        private Vector3 closedPosition;   
+        private Vector3 openedPosition;   
+        private Coroutine doorCoroutine;  
 
         private void Awake()
         {
@@ -24,6 +27,10 @@ namespace Gimmick
             {
                 doorCollider = GetComponent<Collider2D>();
             }
+
+            closedPosition = transform.position;
+            openedPosition = closedPosition + (Vector3)moveDistance;
+
         }
 
         ///<summary>
@@ -34,13 +41,30 @@ namespace Gimmick
             if (isOpen) return;
 
             isOpen = true;
-            StartCoroutine(Co_OpenDoor());
+
+            if (doorCoroutine != null) StopCoroutine(doorCoroutine);
+            doorCoroutine = StartCoroutine(Co_MoveDoor(openedPosition, false));
         }
 
-        private IEnumerator Co_OpenDoor()
+        public void Close()
         {
+            if (!isOpen) return;
+
+            isOpen = false;
+
+            if (doorCoroutine != null) StopCoroutine(doorCoroutine);
+            doorCoroutine = StartCoroutine(Co_MoveDoor(closedPosition, true));
+        }
+
+        private IEnumerator Co_MoveDoor(Vector3 targetPosition, bool enableColliderOnEnd)
+        {
+
+            if (enableColliderOnEnd && doorCollider != null)
+            {
+                doorCollider.enabled = true;
+            }
+
             Vector3 startPosition = transform.position;
-            Vector3 targetPosition = startPosition + (Vector3)moveDistance;
             float elapsedTime = 0f;
 
             while (elapsedTime < moveDuration)
@@ -59,6 +83,8 @@ namespace Gimmick
             {
                 doorCollider.enabled = false;
             }
+
+            doorCoroutine = null;
         }
     }
 }
