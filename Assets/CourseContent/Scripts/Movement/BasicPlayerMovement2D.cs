@@ -466,6 +466,13 @@ namespace FourGuardians.CourseContent.Movement
                 Debug.LogWarning($"[로그 3 실패] {other.gameObject.name} 또는 그 부모에서 RotationPuzzle 스크립트를 찾지 못했습니다.");
             }
 
+            //시간 제한 스위치 퍼즐 피격
+            var attackSwitchPuzzle = other.GetComponentInParent<Gimmick.TimedAttackSwitch.TimedAttackSwitchPuzzle>();
+            if(attackSwitchPuzzle !=null)
+            {
+                attackSwitchPuzzle.OnAttacked(other.transform);
+            }
+
             if (!other.name.Contains("Ladder")) return;
             nearLadder = true;
             currentLadder = other;

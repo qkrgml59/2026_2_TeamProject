@@ -10,7 +10,7 @@ namespace FourGuardians.CourseContent.CameraSystem
     {
         [Tooltip("이 레이어의 이동량을 계산할 기준 카메라입니다.")]
         [SerializeField] private Transform cameraTransform;
-        [Tooltip("가로 카메라 이동량 중 이 레이어가 따라갈 비율입니다. 작을수록 멀리 보입니다.")]
+        [Tooltip("가로 카메라 이동량 중 이 레이어가 따라갈 비율입니다. 숫자가 클수록 멀리 보입니다.")]
         [Range(0f, 1f)]
         [SerializeField] private float horizontalMultiplier = 0.3f;
         [Tooltip("세로 카메라 이동량 중 이 레이어가 따라갈 비율입니다. 가로보다 작게 두면 안정적입니다.")]

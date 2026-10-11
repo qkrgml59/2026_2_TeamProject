@@ -775,7 +775,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7401083dcb124594bb099deb9ef1401e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
-  firstGameSceneName: SampleScene
+  firstGameSceneName: Test_Gimmick
   newGameButton: {fileID: 1948058130}
   continueButton: {fileID: 1796112605}
   settingsButton: {fileID: 2026676813}
