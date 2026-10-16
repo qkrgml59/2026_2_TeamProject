@@ -1,63 +1,62 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
-
 
 public class MainMenuController : MonoBehaviour
 {
-    [Header("씬")]
-    [SerializeField] private string firstGameSceneName = "GameScene";
-
     [Header("버튼")]
-    [SerializeField] private Button newGameButton;
     [SerializeField] private Button continueButton;
+    [FormerlySerializedAs("newGameButton")]          // 기존 인스펙터 연결 유지
+    [SerializeField] private Button startButton;     // 슬롯 선택
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button quitButton;
 
-    private PauseMenuController pauseMenuController;
+    // Systems 프리팹(DontDestroyOnLoad)에 있으므로 인스펙터로 연결할 수 없어 실행 시 검색
+    private PauseMenuController pauseMenu;
 
     private void Awake()
     {
-        newGameButton.onClick.AddListener(StartNewGame);
+        pauseMenu = FindAnyObjectByType<PauseMenuController>();
+        if (pauseMenu == null)
+            Debug.LogError("[MainMenu] PauseMenuController를 찾을 수 없습니다. Systems 프리팹을 확인하세요.");
+
         continueButton.onClick.AddListener(ContinueGame);
-        settingsButton.onClick.AddListener(OpenSettings);
-        quitButton.onClick.AddListener(QuitGame);
+        startButton.onClick.AddListener(() => pauseMenu.OpenProfileSelect());
+        settingsButton.onClick.AddListener(() => pauseMenu.OpenSettings());
+        quitButton.onClick.AddListener(() => pauseMenu.ConfirmQuitFromTitle());
+    }
+
+    private void OnEnable() => SaveManager.Instance.SlotsChanged += RefreshContinueButton;
+    private void OnDisable()
+    {
+        if (SaveManager.HasInstance)
+            SaveManager.Instance.SlotsChanged -= RefreshContinueButton;
     }
 
     private void Start()
     {
-        // TODO: 저장 데이터가 있을 때만 활성화
-        continueButton.interactable = false;
-
-        pauseMenuController = FindAnyObjectByType<PauseMenuController>();
+        RefreshContinueButton();
     }
 
-    private void StartNewGame()
-    {
-        if (SceneLoadManager.Instance.IsLoading) return;
-
-        SetButtonsInteractable(false); // 페이드 중 중복 클릭 방지
-        SceneLoadManager.Instance.LoadScene(firstGameSceneName);
-    }
-
+    /// <summary>가장 최근에 플레이한 프로필 이어하기</summary>
     private void ContinueGame()
     {
-        // TODO: 저장 시스템 구현 후 저장된 씬으로 이동
+        if (!SaveManager.Instance.TryGetLatestSlot(out int slot)) return;
+
+        if (SaveManager.Instance.Load(slot))
+            SetButtonsInteractable(false);
     }
 
-    private void OpenSettings()
+    // 슬롯 선택 화면에서 프로필을 지우면 이어하기 버튼 상태 갱신
+    private void RefreshContinueButton()
     {
-        pauseMenuController.OpenSettings();
-    }
-
-    private void QuitGame()
-    {
-        GameManager.Instance.QuitGame();
+        continueButton.interactable = SaveManager.Instance.TryGetLatestSlot(out _);
     }
 
     private void SetButtonsInteractable(bool interactable)
     {
-        newGameButton.interactable = interactable;
-        continueButton.interactable = false; // 저장 시스템 전까지 항상 비활성
+        continueButton.interactable = interactable && SaveManager.Instance.TryGetLatestSlot(out _);
+        startButton.interactable = interactable;
         settingsButton.interactable = interactable;
         quitButton.interactable = interactable;
     }

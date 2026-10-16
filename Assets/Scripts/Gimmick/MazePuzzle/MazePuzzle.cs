@@ -60,6 +60,8 @@ namespace Gimmick.MazePuzzle
 
         private float lastBounceTime = 0f;
 
+        private PermanentClear permanentClear;
+
         void Start()
         {
             if (movingObject != null)
@@ -71,6 +73,10 @@ namespace Gimmick.MazePuzzle
             InitPadVisuals();
 
             ValidateSettings();
+
+            permanentClear = GetComponent<PermanentClear>();
+            if (permanentClear != null && permanentClear.IsCleared)
+                RestoreSolved();
         }
 
         private void InitPadVisuals()
@@ -253,6 +259,24 @@ namespace Gimmick.MazePuzzle
             {
                 targetDoor.Open();
             }
+
+            if (permanentClear != null)
+                permanentClear.MarkCleared();
+        }
+
+        /// <summary> 저장된 진행도로 복원: 연출 없이 풀린 상태로 </summary>
+        private void RestoreSolved()
+        {
+            isSolved = true; // FixedUpdate의 이동이 멈춤
+
+            if (movingObject != null && targetButton != null)
+                movingObject.position = targetButton.transform.position;
+
+            if (movingRb != null)
+                movingRb.linearVelocity = Vector2.zero;
+
+            if (targetDoor != null)
+                targetDoor.OpenImmediate();
         }
     }
 }

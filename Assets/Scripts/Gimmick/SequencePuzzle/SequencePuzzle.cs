@@ -26,6 +26,8 @@ namespace Puzzle.Sequence
         private bool isSolved = false;
         private bool isResetting = false;
 
+        private PermanentClear permanentClear;
+
         public void Start()
         {
             //오브젝트 퍼즐 연결
@@ -40,6 +42,10 @@ namespace Puzzle.Sequence
 
            //퍼즐 순서가 맞는지 검사
             ValidateSettings();
+
+            permanentClear = GetComponent<PermanentClear>();
+            if (permanentClear != null && permanentClear.IsCleared)
+                RestoreSolved();
         }
 
         private void ValidateSettings()
@@ -110,8 +116,26 @@ namespace Puzzle.Sequence
             {
                 targetDoor.Open();
             }
+
+            if (permanentClear != null)
+                permanentClear.MarkCleared();
         }
 
+        /// <summary> 저장된 진행도로 복원: 연출 없이 풀린 상태로 </summary>
+        private void RestoreSolved()
+        {
+            isSolved = true;
+
+            if (targetDoor != null)
+                targetDoor.OpenImmediate();
+
+            // 정답 오브젝트들을 성공 상태로 표시
+            foreach (var obj in answerSequence)
+            {
+                if (obj != null)
+                    obj.SetSuccessState();
+            }
+        }
     }
 }
 

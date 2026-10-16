@@ -18,6 +18,8 @@ namespace Gimmick.RotationPuzzle
 
         private bool isSolved = false;
 
+        private PermanentClear permanentClear;
+
         private void Start()
         {
             //각 조각에 RotationPuzzlePiece 컴포넌트가 있다면 부모 참조 등록
@@ -33,6 +35,10 @@ namespace Gimmick.RotationPuzzle
                     piece.Init(this);
                 }
             }
+
+            permanentClear = GetComponent<PermanentClear>();
+            if (permanentClear != null && permanentClear.IsCleared)
+                RestoreSolved();
         }
 
         public void CheckPuzzle(Transform hitObject)
@@ -87,6 +93,26 @@ namespace Gimmick.RotationPuzzle
             if (targetDoor != null)
             {
                 targetDoor.Open();
+            }
+
+            if (permanentClear != null)
+                permanentClear.MarkCleared();
+        }
+
+        /// <summary> 저장된 진행도로 복원: 연출 없이 풀린 상태로 </summary>
+        private void RestoreSolved()
+        {
+            isSolved = true;
+
+            if (targetDoor != null)
+                targetDoor.OpenImmediate();
+
+            foreach (var obj in puzzleObjects)
+            {
+                if (obj == null) continue;
+
+                Vector3 euler = obj.eulerAngles;
+                obj.eulerAngles = new Vector3(euler.x, euler.y, 0f);
             }
         }
     }

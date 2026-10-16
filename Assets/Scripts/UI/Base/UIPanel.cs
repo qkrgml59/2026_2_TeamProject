@@ -55,4 +55,13 @@ public class UIPanel : MonoBehaviour
         Group.blocksRaycasts = false;
         gameObject.SetActive(false);
     }
+
+    /// <summary>
+    /// 보이는 상태를 유지한 채 입력만 막거나 허용
+    /// </summary>
+    public void SetInteractable(bool interactable)
+    {
+        Group.interactable = interactable;
+        Group.blocksRaycasts = interactable;
+    }
 }

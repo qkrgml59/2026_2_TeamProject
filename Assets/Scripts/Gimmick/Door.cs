@@ -56,6 +56,22 @@ namespace Gimmick
             doorCoroutine = StartCoroutine(Co_MoveDoor(closedPosition, true));
         }
 
+        /// <summary> Å¬¸®¾î ÇÑ ÆÛÁñ¿ë ¿ÀÇÂ </summary>
+        public void OpenImmediate()
+        {
+            if (doorCoroutine != null)
+            {
+                StopCoroutine(doorCoroutine);
+                doorCoroutine = null;
+            }
+
+            isOpen = true;
+            transform.position = openedPosition;
+
+            if (doorCollider != null)
+                doorCollider.enabled = false;
+        }
+
         private IEnumerator Co_MoveDoor(Vector3 targetPosition, bool enableColliderOnEnd)
         {
 

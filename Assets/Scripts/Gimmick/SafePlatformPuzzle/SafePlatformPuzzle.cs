@@ -45,6 +45,8 @@ namespace Gimmick.SafePlatform
 
         private List<Vector3> originPositions = new List<Vector3>();
 
+        private PermanentClear permanentClear;
+
         private void Start()
         {
             ValidateSettings();
@@ -58,6 +60,10 @@ namespace Gimmick.SafePlatform
                     originPositions.Add(pad.transform.position);
                 }
             }
+
+            permanentClear = GetComponent<PermanentClear>();
+            if (permanentClear != null && permanentClear.IsCleared)
+                RestoreSolved();
         }
 
         private void ValidateSettings()
@@ -231,6 +237,18 @@ namespace Gimmick.SafePlatform
             {
                 targetDoor.Open();
             }
+
+            if (permanentClear != null)
+                permanentClear.MarkCleared();
+        }
+
+        /// <summary>저장된 진행도로 복원: 연출 없이 풀린 상태로</summary>
+        private void RestoreSolved()
+        {
+            isSolved = true; // Update에서 발판 밟기 판정을 하지 않음
+
+            if (targetDoor != null)
+                targetDoor.OpenImmediate();
         }
     }
 }

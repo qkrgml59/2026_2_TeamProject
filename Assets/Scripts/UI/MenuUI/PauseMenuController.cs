@@ -1,22 +1,29 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PauseMenuController : MonoBehaviour
 {
     [Header("패널")]
     [SerializeField] private UIPanel pauseMenuPanel;
-    [SerializeField] private UIPanel saveLoadPanel;
+    [SerializeField] private ProfileSelectView profilePanel;
     [SerializeField] private UIPanel settingsPanel;
+    [SerializeField] private ConfirmPopup confirmPopup;
 
     [Header("버튼")]
     [SerializeField] private Button resumeButton;
-    [SerializeField] private Button saveLoadButton;
     [SerializeField] private Button settingsButton;
-    [SerializeField] private Button mainMenuButton;
+    [FormerlySerializedAs("mainMenuButton")]        // 기존 인스펙터 연결 유지
+    [SerializeField] private Button saveAndExitButton;
     [SerializeField] private Button quitButton;
+
+    [Header("문구")]
+    [SerializeField, TextArea] private string quitMessageInGame = "정말 종료하시겠습니까?\n저장하지 않은 데이터는 삭제됩니다.";
+    [SerializeField, TextArea] private string quitMessageTitle = "정말 종료하시겠습니까?";
 
     private readonly Stack<UIPanel> panelStack = new Stack<UIPanel>();
 
@@ -25,19 +32,22 @@ public class PauseMenuController : MonoBehaviour
     private void Awake()
     {
         resumeButton.onClick.AddListener(Resume);
-        saveLoadButton.onClick.AddListener(() => Push(saveLoadPanel));
         settingsButton.onClick.AddListener(() => Push(settingsPanel));
-        mainMenuButton.onClick.AddListener(GoToMainMenu);
-        quitButton.onClick.AddListener(QuitGame);
+        saveAndExitButton.onClick.AddListener(SaveAndExitToTitle);
+        quitButton.onClick.AddListener(() => ShowConfirm(quitMessageInGame, () => GameManager.Instance.QuitGame()));
 
-        saveLoadPanel.CloseRequested += Back;
+        profilePanel.CloseRequested += Back;
+        profilePanel.ProfileSelected += HandleProfileSelected;
         settingsPanel.CloseRequested += Back;
+        confirmPopup.CloseRequested += Back;
     }
 
     private void OnDestroy()
     {
-        saveLoadPanel.CloseRequested -= Back;
+        profilePanel.CloseRequested -= Back;
+        profilePanel.ProfileSelected -= HandleProfileSelected;
         settingsPanel.CloseRequested -= Back;
+        confirmPopup.CloseRequested -= Back;
     }
 
     private void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
@@ -58,15 +68,15 @@ public class PauseMenuController : MonoBehaviour
     private void Update()
     {
         if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame) return;
-
-        // 씬 전환(페이드) 중에는 ESC 무시
         if (SceneLoadManager.Instance != null && SceneLoadManager.Instance.IsLoading) return;
 
         if (IsOpen)
-            Back();
+            Back();   // 팝업이 열려 있으면 ESC = 취소
         else if (GameManager.Instance.CurrentState == GameState.Playing)
             Open();
     }
+
+    // ───────── 인게임 ─────────
 
     public void Open()
     {
@@ -75,7 +85,7 @@ public class PauseMenuController : MonoBehaviour
         Push(pauseMenuPanel);
     }
 
-    /// <summary>1. 돌아가기: 열린 패널을 모두 닫고 게임 재개</summary>
+    /// <summary>1. 돌아가기</summary>
     public void Resume()
     {
         while (panelStack.Count > 0)
@@ -84,7 +94,49 @@ public class PauseMenuController : MonoBehaviour
         GameManager.Instance.RestorePreviousState();
     }
 
-    /// <summary>한 단계 뒤로. 마지막 패널을 닫으면 게임 재개</summary>
+    /// <summary>3. 저장 후 나가기: 현재 위치 저장 → 타이틀</summary>
+    private void SaveAndExitToTitle()
+    {
+        SaveManager.Instance.AutoSave();
+        CloseAllImmediate();
+        GameManager.Instance.LoadTitleScene();
+    }
+
+    // ───────── 타이틀 화면용 (일시정지 없음) ─────────
+
+    public void OpenSettings()
+    {
+        if (IsOpen) return;
+        Push(settingsPanel);
+    }
+
+    public void OpenProfileSelect()
+    {
+        if (IsOpen) return;
+        Push(profilePanel);
+    }
+
+    public void ConfirmQuitFromTitle()
+    {
+        if (IsOpen) return;
+        ShowConfirm(quitMessageTitle, () => GameManager.Instance.QuitGame());
+    }
+
+    private void HandleProfileSelected(int slot)
+    {
+        if (SaveManager.Instance.StartOrContinue(slot))
+            CloseAllImmediate();
+    }
+
+    // ───────── 공통 ─────────
+
+    /// <summary>확인 팝업 표시. 뒤의 패널은 보이는 채로 입력만 막음</summary>
+    public void ShowConfirm(string message, Action onConfirm)
+    {
+        confirmPopup.Setup(message, onConfirm);
+        Push(confirmPopup, keepPreviousVisible: true);
+    }
+
     public void Back()
     {
         if (panelStack.Count == 0) return;
@@ -92,15 +144,20 @@ public class PauseMenuController : MonoBehaviour
         panelStack.Pop().Hide();
 
         if (panelStack.Count > 0)
-            panelStack.Peek().Show();
+            panelStack.Peek().Show();   // 숨겼던 패널은 다시 표시, 입력만 막았던 패널은 입력 복구
         else
-            GameManager.Instance.RestorePreviousState();
+            GameManager.Instance.RestorePreviousState(); // 타이틀에서는 Paused가 아니므로 아무 일도 없음
     }
 
-    private void Push(UIPanel panel)
+    private void Push(UIPanel panel, bool keepPreviousVisible = false)
     {
         if (panelStack.Count > 0)
-            panelStack.Peek().Hide();
+        {
+            if (keepPreviousVisible)
+                panelStack.Peek().SetInteractable(false);
+            else
+                panelStack.Peek().Hide();
+        }
 
         panelStack.Push(panel);
         panel.Show();
@@ -110,27 +167,8 @@ public class PauseMenuController : MonoBehaviour
     {
         panelStack.Clear();
         pauseMenuPanel.HideImmediate();
-        saveLoadPanel.HideImmediate();
+        profilePanel.HideImmediate();
         settingsPanel.HideImmediate();
-    }
-
-    /// <summary>4. 메뉴로 나가기</summary>
-    private void GoToMainMenu()
-    {
-        // TODO: "저장하지 않은 진행 상황은 사라집니다" 확인 팝업
-        CloseAllImmediate(); // 메뉴만 닫고 Paused 상태는 유지 → 멈춘 화면 위로 페이드아웃
-        GameManager.Instance.LoadTitleScene();
-    }
-
-    public void OpenSettings()
-    {
-        if (IsOpen) return;
-        Push(settingsPanel);
-    }
-
-    /// <summary>5. 게임 종료</summary>
-    private void QuitGame()
-    {
-        GameManager.Instance.QuitGame();
+        confirmPopup.HideImmediate();
     }
 }

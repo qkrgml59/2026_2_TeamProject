@@ -358,6 +358,8 @@ GameObject:
   m_Component:
   - component: {fileID: 43155529}
   - component: {fileID: 43155528}
+  - component: {fileID: 43155530}
+  - component: {fileID: 43155531}
   m_Layer: 0
   m_Name: MazePuzzle
   m_TagString: Untagged
@@ -408,6 +410,39 @@ Transform:
   - {fileID: 744014924}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &43155530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43155527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d5990d51535424e9234b47d8b7cdd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UniqueId
+  id: 744da08b-5cc6-44c1-9925-650e8866e472
+--- !u!114 &43155531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43155527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 521174fdd02324247bf21d9c478b8f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PermanentClear
+  category: 1
+  customKey: 
+  onAlreadyCleared:
+    m_PersistentCalls:
+      m_Calls: []
+  onCleared:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &73631768
 GameObject:
   m_ObjectHideFlags: 0
@@ -419,7 +454,7 @@ GameObject:
   - component: {fileID: 73631769}
   - component: {fileID: 73631771}
   - component: {fileID: 73631770}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -869,85 +904,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 653525234}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &158577406
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 158577409}
-  - component: {fileID: 158577408}
-  - component: {fileID: 158577407}
-  m_Layer: 0
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &158577407
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 158577406}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
-  m_SendPointerHoverToParent: 1
-  m_MoveRepeatDelay: 0.5
-  m_MoveRepeatRate: 0.1
-  m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_DeselectOnBackgroundClick: 1
-  m_PointerBehavior: 0
-  m_CursorLockBehavior: 0
-  m_ScrollDeltaPerTick: 6
---- !u!114 &158577408
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 158577406}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &158577409
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 158577406}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &203844586
 GameObject:
   m_ObjectHideFlags: 0
@@ -1240,7 +1196,7 @@ GameObject:
   - component: {fileID: 215504378}
   - component: {fileID: 215504380}
   - component: {fileID: 215504379}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (22)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1469,7 +1425,7 @@ GameObject:
   - component: {fileID: 231787779}
   - component: {fileID: 231787781}
   - component: {fileID: 231787780}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1997,7 +1953,7 @@ GameObject:
   - component: {fileID: 305482563}
   - component: {fileID: 305482565}
   - component: {fileID: 305482564}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (17)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2134,6 +2090,9 @@ GameObject:
   m_Component:
   - component: {fileID: 344369764}
   - component: {fileID: 344369763}
+  - component: {fileID: 344369765}
+  - component: {fileID: 344369767}
+  - component: {fileID: 344369766}
   m_Layer: 0
   m_Name: SafePlatformPuzzle_001
   m_TagString: Untagged
@@ -2184,6 +2143,59 @@ Transform:
   - {fileID: 1524297922}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &344369765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 344369762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d5990d51535424e9234b47d8b7cdd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UniqueId
+  id: 45fc1295-1034-4941-82ca-ecf7618df913
+--- !u!114 &344369766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 344369762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 521174fdd02324247bf21d9c478b8f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PermanentClear
+  category: 1
+  customKey: 
+  onAlreadyCleared:
+    m_PersistentCalls:
+      m_Calls: []
+  onCleared:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &344369767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 344369762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 521174fdd02324247bf21d9c478b8f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PermanentClear
+  category: 1
+  customKey: 
+  onAlreadyCleared:
+    m_PersistentCalls:
+      m_Calls: []
+  onCleared:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &374937745
 GameObject:
   m_ObjectHideFlags: 0
@@ -2447,7 +2459,7 @@ GameObject:
   - component: {fileID: 399900246}
   - component: {fileID: 399900248}
   - component: {fileID: 399900247}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2928,7 +2940,7 @@ GameObject:
   - component: {fileID: 505099834}
   - component: {fileID: 505099836}
   - component: {fileID: 505099835}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3295,7 +3307,7 @@ GameObject:
   - component: {fileID: 525011903}
   - component: {fileID: 525011904}
   - component: {fileID: 525011905}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3433,7 +3445,7 @@ GameObject:
   - component: {fileID: 581326905}
   - component: {fileID: 581326907}
   - component: {fileID: 581326906}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3850,6 +3862,8 @@ GameObject:
   - component: {fileID: 653525234}
   - component: {fileID: 653525233}
   - component: {fileID: 653525235}
+  - component: {fileID: 653525236}
+  - component: {fileID: 653525237}
   m_Layer: 0
   m_Name: RotationPuzzle
   m_TagString: Untagged
@@ -3940,6 +3954,39 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &653525236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 653525232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d5990d51535424e9234b47d8b7cdd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UniqueId
+  id: 3dcde99f-594b-4c44-bac3-4085a1471a25
+--- !u!114 &653525237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 653525232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 521174fdd02324247bf21d9c478b8f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PermanentClear
+  category: 1
+  customKey: 
+  onAlreadyCleared:
+    m_PersistentCalls:
+      m_Calls: []
+  onCleared:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &675353979
 GameObject:
   m_ObjectHideFlags: 0
@@ -3951,7 +3998,7 @@ GameObject:
   - component: {fileID: 675353980}
   - component: {fileID: 675353982}
   - component: {fileID: 675353981}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4227,7 +4274,7 @@ GameObject:
   - component: {fileID: 692095079}
   - component: {fileID: 692095081}
   - component: {fileID: 692095080}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4365,7 +4412,7 @@ GameObject:
   - component: {fileID: 692925259}
   - component: {fileID: 692925261}
   - component: {fileID: 692925260}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4503,7 +4550,7 @@ GameObject:
   - component: {fileID: 697645270}
   - component: {fileID: 697645272}
   - component: {fileID: 697645271}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4641,7 +4688,7 @@ GameObject:
   - component: {fileID: 707411717}
   - component: {fileID: 707411719}
   - component: {fileID: 707411718}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (18)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10045,7 +10092,7 @@ GameObject:
   - component: {fileID: 832609486}
   - component: {fileID: 832609488}
   - component: {fileID: 832609487}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10695,7 +10742,7 @@ GameObject:
   - component: {fileID: 974001148}
   - component: {fileID: 974001150}
   - component: {fileID: 974001149}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (15)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10833,7 +10880,7 @@ GameObject:
   - component: {fileID: 987617280}
   - component: {fileID: 987617282}
   - component: {fileID: 987617281}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (19)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12341,7 +12388,7 @@ GameObject:
   - component: {fileID: 1336320911}
   - component: {fileID: 1336320913}
   - component: {fileID: 1336320912}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (20)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12510,7 +12557,7 @@ GameObject:
   - component: {fileID: 1375823463}
   - component: {fileID: 1375823465}
   - component: {fileID: 1375823464}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13583,7 +13630,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1482795819}
   - component: {fileID: 1482795818}
-  - component: {fileID: 1482795817}
   - component: {fileID: 1482795816}
   m_Layer: 0
   m_Name: Main Camera (1)
@@ -13636,14 +13682,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!81 &1482795817
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1482795815}
-  m_Enabled: 1
 --- !u!20 &1482795818
 Camera:
   m_ObjectHideFlags: 0
@@ -13721,7 +13759,7 @@ GameObject:
   - component: {fileID: 1491997493}
   - component: {fileID: 1491997495}
   - component: {fileID: 1491997494}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (23)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15114,7 +15152,7 @@ GameObject:
   - component: {fileID: 1744404222}
   - component: {fileID: 1744404224}
   - component: {fileID: 1744404223}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (16)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15580,6 +15618,8 @@ GameObject:
   - component: {fileID: 1841553879}
   - component: {fileID: 1841553878}
   - component: {fileID: 1841553877}
+  - component: {fileID: 1841553885}
+  - component: {fileID: 1841553884}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -15752,6 +15792,43 @@ Transform:
   - {fileID: 774733708}
   m_Father: {fileID: 1070410536}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1841553884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841553875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba4635bd753750d4a8796374b870d946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveable
+  safeGroundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+--- !u!114 &1841553885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841553875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64ec83f1fc1b63647a0420ad4ab93714, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.Move.PlayerMoveMent
+  moveSpeed: 5
+  jumpSpeed: 9
+  dashSpeed: 11
+  slideSpeed: 8
+  ladderSpeed: 3
+  wallSlideSpeed: 2
+  wallJumpHorizontalSpeed: 6
+  wallJumpInputLockDuration: 0.18
+  wallVisualInsetRatio: 0.5
+  wallContactSkin: 0.01
 --- !u!1 &1853383133
 GameObject:
   m_ObjectHideFlags: 0
@@ -15763,7 +15840,7 @@ GameObject:
   - component: {fileID: 1853383134}
   - component: {fileID: 1853383136}
   - component: {fileID: 1853383135}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15900,6 +15977,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1879120941}
   - component: {fileID: 1879120940}
+  - component: {fileID: 1879120942}
+  - component: {fileID: 1879120943}
   m_Layer: 0
   m_Name: SequencePuzzle
   m_TagString: Untagged
@@ -15951,6 +16030,39 @@ Transform:
   - {fileID: 1178004059}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1879120942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1879120939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d5990d51535424e9234b47d8b7cdd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UniqueId
+  id: 33e467e5-3c08-4995-a894-d6839e2b4950
+--- !u!114 &1879120943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1879120939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 521174fdd02324247bf21d9c478b8f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PermanentClear
+  category: 1
+  customKey: 
+  onAlreadyCleared:
+    m_PersistentCalls:
+      m_Calls: []
+  onCleared:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1889948243
 GameObject:
   m_ObjectHideFlags: 0
@@ -15962,7 +16074,7 @@ GameObject:
   - component: {fileID: 1889948244}
   - component: {fileID: 1889948246}
   - component: {fileID: 1889948245}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16100,7 +16212,7 @@ GameObject:
   - component: {fileID: 1919269977}
   - component: {fileID: 1919269979}
   - component: {fileID: 1919269978}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16375,6 +16487,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1954287297}
   - component: {fileID: 1954287296}
+  - component: {fileID: 1954287298}
+  - component: {fileID: 1954287299}
   m_Layer: 0
   m_Name: SafePlatformPuzzle_002
   m_TagString: Untagged
@@ -16425,6 +16539,39 @@ Transform:
   - {fileID: 1358197237}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1954287298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954287295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d5990d51535424e9234b47d8b7cdd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UniqueId
+  id: 54cf0855-8311-485b-aa1b-45c12a85072c
+--- !u!114 &1954287299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954287295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 521174fdd02324247bf21d9c478b8f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PermanentClear
+  category: 1
+  customKey: 
+  onAlreadyCleared:
+    m_PersistentCalls:
+      m_Calls: []
+  onCleared:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1992514943
 GameObject:
   m_ObjectHideFlags: 0
@@ -16468,7 +16615,7 @@ GameObject:
   - component: {fileID: 2003933562}
   - component: {fileID: 2003933564}
   - component: {fileID: 2003933563}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground (21)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16973,6 +17120,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2112521359}
   - component: {fileID: 2112521358}
+  - component: {fileID: 2112521360}
+  - component: {fileID: 2112521361}
   m_Layer: 0
   m_Name: TimedSwitchPuzzle
   m_TagString: Untagged
@@ -17012,6 +17161,39 @@ Transform:
   - {fileID: 1612693750}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2112521360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2112521357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d5990d51535424e9234b47d8b7cdd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UniqueId
+  id: 70a540e8-bb8c-429e-be9a-d1bdd73b4448
+--- !u!114 &2112521361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2112521357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 521174fdd02324247bf21d9c478b8f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PermanentClear
+  category: 1
+  customKey: 
+  onAlreadyCleared:
+    m_PersistentCalls:
+      m_Calls: []
+  onCleared:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -17020,7 +17202,6 @@ SceneRoots:
   - {fileID: 203844589}
   - {fileID: 951114731}
   - {fileID: 1032339009}
-  - {fileID: 158577409}
   - {fileID: 840248849}
   - {fileID: 1070410536}
   - {fileID: 1992514944}
