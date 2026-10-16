@@ -76,7 +76,9 @@ public class SceneLoadManager : SingletonMonoBehaviour<SceneLoadManager>
         StartCoroutine(CompleteLoadingRoutine(op));
     }
 
-    /// <summary>로딩 실패 시 페이드와 입력 차단을 해제합니다.</summary>
+    /// <summary>
+    /// 로딩 실패 시 페이드와 입력 차단을 해제.
+    /// </summary>
     public void AbortLoading()
     {
         StartCoroutine(FadeIn());
