@@ -6408,7 +6408,7 @@ MonoBehaviour:
   isFirstChallenge: 1
   playerTransform: {fileID: 1523459293}
   currentPhase: 1
-  attackRange: 3
+  attackRange: 5
   moveSpeed: 3
   dashCooldown: 5
   animator: {fileID: 763163846}
@@ -6554,7 +6554,7 @@ Transform:
   m_GameObject: {fileID: 784068477}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -33.16, y: 3, z: 0}
+  m_LocalPosition: {x: -33.16, y: 1.93, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9276,7 +9276,7 @@ Transform:
   m_GameObject: {fileID: 2097751640}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.83, y: 3, z: 0}
+  m_LocalPosition: {x: -8.83, y: 1.93, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
