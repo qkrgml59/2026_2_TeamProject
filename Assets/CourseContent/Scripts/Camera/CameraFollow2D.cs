@@ -55,6 +55,14 @@ namespace FourGuardians.CourseContent.CameraSystem
         private float horizontalVelocity;
         private float verticalVelocity;
         private float desiredVerticalPosition;
+        private float shakeRemaining;
+        private float shakeStrength;
+
+        public void AddShake(float strength, float duration)
+        {
+            shakeStrength = Mathf.Max(shakeStrength, strength);
+            shakeRemaining = Mathf.Max(shakeRemaining, duration);
+        }
 
         private void Awake()
         {
@@ -141,7 +149,15 @@ namespace FourGuardians.CourseContent.CameraSystem
                 desiredY = Mathf.Round(desiredY * safePixelsPerUnit) / safePixelsPerUnit;
             }
 
-            transform.position = new Vector3(desiredX, desiredY, transform.position.z);
+            Vector2 shakeOffset = Vector2.zero;
+
+            if (shakeRemaining > 0f)
+            {
+                shakeRemaining -= Time.unscaledDeltaTime;
+                shakeOffset = Random.insideUnitCircle * shakeStrength;
+            }
+
+            transform.position = new Vector3(desiredX + shakeOffset.x, desiredY + shakeOffset.y, transform.position.z);
         }
     }
 }
