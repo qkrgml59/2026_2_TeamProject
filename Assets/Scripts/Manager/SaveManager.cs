@@ -32,6 +32,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     public event Action SlotsChanged;
 
     private SaveData pendingLoad;
+    private string directSceneInitialization;
 
     // 저장 주기 타이머
     private float periodicSaveTimer;
@@ -156,6 +157,29 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     /// <summary> 슬롯 선택: 빈 슬롯이면 새 게임, 데이터가 있으면 이어하기 </summary>
     public bool StartOrContinue(int slot) => HasSave(slot) ? Load(slot) : StartNewGame(slot);
 
+    /// <summary>
+    /// MapTest를 직접 실행할 때 기존 자동저장과 맵 진입 복귀를 연결합니다.
+    /// 별도 하위 폴더만 사용하며 기존 팀 프로필과 새 게임 씬 설정은 변경하지 않습니다.
+    /// </summary>
+    /// <remarks>호출하지 않는 기존 씬은 제목/새 게임의 슬롯 선택 흐름을 그대로 사용합니다.</remarks>
+    public bool BeginDirectSceneSession(string profileName)
+    {
+        if (CurrentSlot >= 0) return true;
+        if (string.IsNullOrEmpty(profileName) || profileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return false;
+        saveDirectory = Path.Combine(Application.persistentDataPath, "Saves", profileName);
+        Directory.CreateDirectory(saveDirectory);
+        ResetSession();
+        CurrentSlot = 0;
+        SaveData loaded = PeekSlot(CurrentSlot);
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (loaded != null && loaded.sceneName != sceneName) loaded = null;
+        PlayTime = loaded != null ? loaded.playTime : 0f;
+        Progress.FromData(loaded != null ? loaded.progress : null);
+        directSceneInitialization = sceneName;
+        StartCoroutine(AfterDirectSceneStarted(loaded));
+        return true;
+    }
+
     public bool StartNewGame(int slot)
     {
         if (!IsValidSlot(slot) || HasSave(slot) || SceneLoadManager.Instance.IsLoading) return false;
@@ -264,6 +288,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (mode != LoadSceneMode.Single) return;
+        if (directSceneInitialization == scene.name) return;
 
         SaveData loaded = null;
         if (pendingLoad != null && pendingLoad.sceneName == scene.name)
@@ -276,6 +301,12 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         }
 
         StartCoroutine(AfterSceneLoaded(loaded));
+    }
+
+    private IEnumerator AfterDirectSceneStarted(SaveData loaded)
+    {
+        yield return AfterSceneLoaded(loaded);
+        directSceneInitialization = null;
     }
 
     private IEnumerator AfterSceneLoaded(SaveData loaded)
