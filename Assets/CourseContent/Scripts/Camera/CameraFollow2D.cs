@@ -92,6 +92,17 @@ namespace FourGuardians.CourseContent.CameraSystem
             maximumPosition = Vector2.Max(newMinimumPosition, newMaximumPosition);
         }
 
+        /// <summary>안전 복귀 때 이전 방의 보간 속도를 버리고 즉시 대상 위치로 이동합니다.</summary>
+        public void SnapToTarget()
+        {
+            if (target == null) return;
+            horizontalVelocity = verticalVelocity = 0f;
+            desiredVerticalPosition = target.position.y + offset.y;
+            transform.position = new Vector3(
+                Mathf.Clamp(target.position.x + offset.x, minimumPosition.x, maximumPosition.x),
+                Mathf.Clamp(desiredVerticalPosition, minimumPosition.y, maximumPosition.y), transform.position.z);
+        }
+
         private void LateUpdate()
         {
             if (target == null)
