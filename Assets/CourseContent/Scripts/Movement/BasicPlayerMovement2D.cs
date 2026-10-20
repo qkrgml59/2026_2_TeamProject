@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using Puzzle.Sequence;
 using UnityEngine;
@@ -25,6 +26,8 @@ namespace FourGuardians.CourseContent.Movement
         [Header("특수 이동")]
         [Tooltip("대시가 진행되는 동안 유지하는 수평 속도입니다.")]
         [SerializeField] private float dashSpeed = 11f;
+        [Tooltip("기존 씬은 대시를 유지하고, 획득형 맵에서만 시작 시 잠급니다.")]
+        [SerializeField] private bool dashUnlocked = true;
         [Tooltip("아래 방향과 이동 방향을 함께 눌렀을 때의 슬라이드 속도입니다.")]
         [SerializeField] private float slideSpeed = 8f;
         [Tooltip("사다리에서 위·아래 입력으로 움직이는 속도입니다.")]
@@ -39,6 +42,17 @@ namespace FourGuardians.CourseContent.Movement
         [SerializeField, Range(0f, 1f)] private float wallVisualInsetRatio = 0.5f;
         [Tooltip("Collider가 벽 안으로 파고들지 않도록 남겨두는 아주 작은 간격입니다.")]
         [SerializeField, Min(0f)] private float wallContactSkin = 0.01f;
+
+        [Header("일방향 발판 통과")]
+        [Tooltip("아래 방향과 점프를 함께 눌러 현재 발판만 통과합니다. 기존 씬은 기본적으로 꺼져 있습니다.")]
+        [SerializeField] private bool allowDropThrough;
+        [SerializeField, Min(0.1f)] private float dropInitialSpeed = 2f;
+
+        private bool dropRequested;
+        private readonly List<Collider2D> ignoredOneWays = new List<Collider2D>();
+        private float dropTimer;
+        private float externalInputLock;
+        public bool IsDroppingThrough => ignoredOneWays.Count > 0;
 
         // 매번 배열을 새로 만들지 않고 재사용하여 불필요한 가비지 생성을 막는다.
         private readonly RaycastHit2D[] hits = new RaycastHit2D[4];
@@ -59,6 +73,7 @@ namespace FourGuardians.CourseContent.Movement
         public WarriorAction Action { get; private set; } = WarriorAction.Idle;
         public Vector2 Velocity => body == null ? Vector2.zero : body.linearVelocity;
         public int Facing => facing;
+        public bool DashUnlocked => dashUnlocked;
         // 고정 픽셀값 대신 현재 Collider 반지름에 비례해 벽 동작의 그림 위치를 보정한다.
         public float WallVisualOffset => bodyCollider == null
             ? 0f
@@ -82,7 +97,7 @@ namespace FourGuardians.CourseContent.Movement
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
-            if (keyboard == null || Action == WarriorAction.Death) return;
+            if (keyboard == null || Action == WarriorAction.Death || externalInputLock > 0f) return;
 
             horizontal = Axis(keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed,
                 keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed);
@@ -97,7 +112,11 @@ namespace FourGuardians.CourseContent.Movement
             if (keyboard.spaceKey.wasPressedThisFrame)
             {
                 if (isClimbing) ladderJumpRequested = true;
-                else jumpRequested = true;
+                else
+                {
+                    jumpRequested = true;
+                    dropRequested = allowDropThrough && (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed);
+                }
             }
             else if (!nearLadder && (keyboard.wKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame))
             {
@@ -108,14 +127,30 @@ namespace FourGuardians.CourseContent.Movement
             if (keyboard.leftShiftKey.wasPressedThisFrame || keyboard.kKey.wasPressedThisFrame)
             {
                 // 짧은 시간에 빠르게 이동해야 대시가 걷기와 확실히 구분된다.
-                Begin(WarriorAction.Dash, 0.28f);
+                RequestDash();
             }
             if (keyboard.hKey.wasPressedThisFrame) Begin(WarriorAction.Hurt, 0.2f);
             if (keyboard.lKey.wasPressedThisFrame)
             {
-                Action = WarriorAction.Death;
-                body.linearVelocity = Vector2.zero;
+                EnterDeathState();
             }
+        }
+
+        /// <summary>MapTest의 획득 진행도를 연결합니다. 기본값 true는 기존 씬의 대시 사용을 유지합니다.</summary>
+        public void SetDashUnlocked(bool unlocked) => dashUnlocked = unlocked;
+
+        /// <summary>키 입력과 능력 해금이 같은 대시 진입 조건을 사용합니다.</summary>
+        public bool RequestDash()
+        {
+            if (!dashUnlocked || externalInputLock > 0f || Action is WarriorAction.Death or WarriorAction.Hurt) return false;
+            Begin(WarriorAction.Dash, 0.28f);
+            return true;
+        }
+        /// <summary>기존 사망 상태와 정지 처리를 체력 이벤트에서도 사용할 수 있게 한다. 부활이나 저장은 처리하지 않는다.</summary>
+        public void EnterDeathState()
+        {
+            Action = WarriorAction.Death;
+            body.linearVelocity = Vector2.zero;
         }
 
         // FixedUpdate에서는 Rigidbody2D를 움직인다. 물리 계산은 일정한 시간 간격으로 해야 안정적이다.
@@ -123,8 +158,19 @@ namespace FourGuardians.CourseContent.Movement
         {
             ladderReentryCooldown = Mathf.Max(0f, ladderReentryCooldown - Time.fixedDeltaTime);
             wallJumpInputLock = Mathf.Max(0f, wallJumpInputLock - Time.fixedDeltaTime);
+            UpdateIgnoredPlatform();
             UpdateGrounded();
+            if (externalInputLock > 0f)
+            {
+                externalInputLock = Mathf.Max(0f, externalInputLock - Time.fixedDeltaTime);
+                body.linearVelocity = Vector2.zero;
+                jumpRequested = dropRequested = false;
+                return;
+            }
             if (Action == WarriorAction.Death) return;
+            bool wantsDrop = dropRequested;
+            dropRequested = false;
+            if (wantsDrop && !isClimbing && (!IsLocked || Action == WarriorAction.Slide) && TryDropThrough()) return;
 
             float vertical = ReadVertical();
             VerticalInput = vertical;
@@ -280,7 +326,7 @@ namespace FourGuardians.CourseContent.Movement
 
             for (int index = 0; index < count; index++)
             {
-                if (hits[index].normal.x * facing <= -0.6f)
+                if (!ignoredOneWays.Contains(hits[index].collider) && hits[index].normal.x * facing <= -0.6f)
                 {
                     return true;
                 }
@@ -306,7 +352,7 @@ namespace FourGuardians.CourseContent.Movement
 
             for (int index = 0; index < count; index++)
             {
-                if (hits[index].normal.y >= 0.6f)
+                if (!ignoredOneWays.Contains(hits[index].collider) && hits[index].normal.y >= 0.6f)
                 {
                     IsGrounded = true;
                     return;
@@ -323,7 +369,7 @@ namespace FourGuardians.CourseContent.Movement
             for (int index = 0; index < count; index++)
             {
                 // 진행 방향의 반대쪽을 바라보는 수직면만 벽으로 취급한다.
-                if (hits[index].normal.x * facing <= -0.6f)
+                if (!ignoredOneWays.Contains(hits[index].collider) && hits[index].normal.x * facing <= -0.6f)
                 {
                     wallHit = hits[index];
                     return true;
@@ -438,6 +484,13 @@ namespace FourGuardians.CourseContent.Movement
         {
             Debug.Log($"[로그 1] 충돌 발생! 충돌 대상: {other.gameObject.name}");
 
+            // 사다리 진입은 공격 상태와 관계없이 처리한다.
+            if (other.name.Contains("Ladder"))
+            {
+                nearLadder = true;
+                currentLadder = other;
+            }
+
             bool isAttacking = Action is WarriorAction.BasicAttack or WarriorAction.JumpAttack or WarriorAction.DashAttack;
 
             if (!isAttacking)
@@ -473,9 +526,79 @@ namespace FourGuardians.CourseContent.Movement
                 attackSwitchPuzzle.OnAttacked(other.transform);
             }
 
-            if (!other.name.Contains("Ladder")) return;
-            nearLadder = true;
-            currentLadder = other;
+        }
+
+        /// <summary>발밑의 독립된 일방향 발판 하나만 잠시 통과한다. 지역 전체 Composite는 무시하지 않는다.</summary>
+        private bool TryDropThrough()
+        {
+            if (!IsGrounded) return false;
+            ContactFilter2D filter = new ContactFilter2D { useTriggers = false };
+            int count = bodyCollider.Cast(Vector2.down, filter, hits, 0.08f);
+            float top = float.NegativeInfinity;
+            for (int index = 0; index < count; index++)
+            {
+                Collider2D platform = hits[index].collider;
+                if (platform == null || platform is CompositeCollider2D || hits[index].normal.y < 0.6f) continue;
+                PlatformEffector2D effector = platform.GetComponent<PlatformEffector2D>();
+                if (effector == null || !effector.useOneWay || !platform.usedByEffector) continue;
+                if (ignoredOneWays.Count == 0) top = platform.bounds.max.y;
+                // 편집 구역의 이음매에서는 같은 높이로 발을 받치는 조각만 함께 통과한다.
+                if (Mathf.Abs(platform.bounds.max.y - top) > 0.025f) continue;
+                ignoredOneWays.Add(platform);
+                Physics2D.IgnoreCollision(bodyCollider, platform, true);
+            }
+            if (ignoredOneWays.Count == 0) return false;
+            dropTimer = 0.8f;
+            jumpRequested = false;
+            IsGrounded = false;
+            body.gravityScale = 3f;
+            body.linearVelocity = new Vector2(horizontal * moveSpeed, -dropInitialSpeed);
+            Action = WarriorAction.Fall;
+            return true;
+        }
+
+        private void UpdateIgnoredPlatform()
+        {
+            if (ignoredOneWays.Count == 0) return;
+            dropTimer -= Time.fixedDeltaTime;
+            for (int index = ignoredOneWays.Count - 1; index >= 0; index--)
+            {
+                Collider2D platform = ignoredOneWays[index];
+                if (platform != null && bodyCollider.bounds.center.y >= platform.bounds.min.y - 0.01f && dropTimer > 0f) continue;
+                if (platform != null) Physics2D.IgnoreCollision(bodyCollider, platform, false);
+                ignoredOneWays.RemoveAt(index);
+            }
+        }
+
+        private void RestoreIgnoredPlatform()
+        {
+            foreach (Collider2D platform in ignoredOneWays)
+                if (platform != null && bodyCollider != null) Physics2D.IgnoreCollision(bodyCollider, platform, false);
+            ignoredOneWays.Clear();
+            dropTimer = 0f;
+        }
+
+        /// <summary>안전 지점 복귀 시 이동·대시·사다리·통과 상태를 함께 정리하고 짧게 입력을 잠근다.</summary>
+        public void ResetAfterTeleport(Vector2 position, float inputLockDuration = 0.2f)
+        {
+            RestoreIgnoredPlatform();
+            horizontal = actionTimer = wallJumpInputLock = ladderReentryCooldown = 0f;
+            jumpRequested = dropRequested = nearLadder = isClimbing = atLadderTop = ladderJumpRequested = false;
+            currentLadder = null;
+            VerticalInput = 0f;
+            externalInputLock = Mathf.Max(0f, inputLockDuration);
+            body.position = position;
+            transform.position = new Vector3(position.x, position.y, transform.position.z);
+            body.linearVelocity = Vector2.zero;
+            body.angularVelocity = 0f;
+            body.gravityScale = 3f;
+            IsGrounded = false;
+            Action = WarriorAction.Idle;
+        }
+
+        private void OnDisable()
+        {
+            RestoreIgnoredPlatform();
         }
 
         private void OnTriggerExit2D(Collider2D other)
