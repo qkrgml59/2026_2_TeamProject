@@ -442,16 +442,42 @@ namespace Player.Move
         {
             //공격받은 오브젝트에서 SequencePuzzleObject 컴포넌트를 가져옴
             //TODO : 나중에 다른 기믹들도 때려서 진행되는 거라면 통합되게 만들어야 할 듯
-            if (other.TryGetComponent<SequencePuzzleObject>(out var puzzleObj))
+            if (Action == WarriorAction.BasicAttack)
             {
-                puzzleObj.OnAttacked(); // 피격 호출
+                //SequencePuzzleObject 컴포넌트를 가져옴
+                if (other.TryGetComponent<SequencePuzzleObject>(out var puzzleObj))
+                {
+                    puzzleObj.OnAttacked(); //피격 호출
+                }
+
+                if (other.TryGetComponent<Puzzle.Sequence.SequencePuzzleObject>(out var seqObj))
+                {
+                    seqObj.OnAttacked();
+                }
+
+                //회전 퍼즐 피격 (부모에 있는 RotationPuzzle 탐색)
+                var rotationPuzzle = other.GetComponentInParent<Gimmick.RotationPuzzle.RotationPuzzle>();
+                if (rotationPuzzle != null)
+                {
+                    Debug.Log($"[로그 3] {other.gameObject.name}에서 RotationPuzzle을 찾았습니다! CheckPuzzle 호출");
+                    rotationPuzzle.CheckPuzzle(other.transform);
+                }
+
+                //타임 공격 스위치 퍼즐 피격
+                var attackSwitchPuzzle = other.GetComponentInParent<Gimmick.TimedAttackSwitch.TimedAttackSwitchPuzzle>();
+                if (attackSwitchPuzzle != null)
+                {
+                    attackSwitchPuzzle.OnAttacked(other.transform);
+                }
             }
 
-            if (!other.name.Contains("Ladder")) return;
-            nearLadder = true;
-            currentLadder = other;
+            if (other.name.Contains("Ladder"))
+            {
+                nearLadder = true;
+                currentLadder = other;
+            }
 
-            
+
         }
 
         private void OnTriggerExit2D(Collider2D other)
