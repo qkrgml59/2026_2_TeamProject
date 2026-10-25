@@ -153,8 +153,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: -80, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &157045045
 MonoBehaviour:
@@ -290,8 +290,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: -80, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &239471330
 MonoBehaviour:
@@ -669,6 +669,7 @@ GameObject:
   - component: {fileID: 586107053}
   - component: {fileID: 586107052}
   - component: {fileID: 586107051}
+  - component: {fileID: 586107056}
   - component: {fileID: 586107055}
   m_Layer: 5
   m_Name: Canvas
@@ -752,6 +753,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1395408603}
   - {fileID: 1796112603}
   - {fileID: 1948058129}
   - {fileID: 2026676811}
@@ -779,6 +781,26 @@ MonoBehaviour:
   startButton: {fileID: 1948058130}
   settingsButton: {fileID: 2026676813}
   quitButton: {fileID: 1352092255}
+--- !u!114 &586107056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 586107050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15de300962ee89448a7470c5637c8575, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverSpriteGroup
+  normalSprite: {fileID: 4838501810126931584, guid: f4eb69ae4174c284482a76f0c2d0e0ff, type: 3}
+  hoverSprite: {fileID: 4741159357157834915, guid: 26f1dbedf9189a147b25b84e4cea75b8, type: 3}
+  flickerStep: 0
+  lightUpDuration: 0.08
+  lightOffDuration: 0.3
+  idleFlicker: 0
+  idleFlickerAmount: 0.06
+  idleFlickerDuration: 0.9
 --- !u!1 &768486492
 GameObject:
   m_ObjectHideFlags: 0
@@ -813,8 +835,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: -80, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &768486494
 MonoBehaviour:
@@ -950,8 +972,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: -80, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &771259276
 MonoBehaviour:
@@ -1283,9 +1305,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbaa8545fef705a4182bc1d90049a392, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PointerHover
-  hoverScaleMultiplier: 1.1
+  hoverScaleMultiplier: 1
   hoverDuration: 0.2
-  clickScaleMultiplier: 1.05
+  clickScaleMultiplier: 0.97
   clickDuration: 0.1
   ease: 6
   ignoreTimeScale: 1
@@ -1360,8 +1382,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 4838501810126931584, guid: f4eb69ae4174c284482a76f0c2d0e0ff, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1377,6 +1399,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1352092252}
+  m_CullTransparentMesh: 1
+--- !u!1 &1395408602
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1395408603}
+  - component: {fileID: 1395408605}
+  - component: {fileID: 1395408604}
+  m_Layer: 5
+  m_Name: Background
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1395408603
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1395408602}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 586107054}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1395408604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1395408602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1395408605
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1395408602}
   m_CullTransparentMesh: 1
 --- !u!1 &1796112602
 GameObject:
@@ -1430,9 +1527,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbaa8545fef705a4182bc1d90049a392, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PointerHover
-  hoverScaleMultiplier: 1.1
+  hoverScaleMultiplier: 1
   hoverDuration: 0.2
-  clickScaleMultiplier: 1.05
+  clickScaleMultiplier: 0.97
   clickDuration: 0.1
   ease: 6
   ignoreTimeScale: 1
@@ -1507,8 +1604,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 4838501810126931584, guid: f4eb69ae4174c284482a76f0c2d0e0ff, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1629,8 +1726,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 4838501810126931584, guid: f4eb69ae4174c284482a76f0c2d0e0ff, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1659,9 +1756,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbaa8545fef705a4182bc1d90049a392, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PointerHover
-  hoverScaleMultiplier: 1.1
+  hoverScaleMultiplier: 1
   hoverDuration: 0.2
-  clickScaleMultiplier: 1.05
+  clickScaleMultiplier: 0.97
   clickDuration: 0.1
   ease: 6
   ignoreTimeScale: 1
@@ -1724,9 +1821,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbaa8545fef705a4182bc1d90049a392, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PointerHover
-  hoverScaleMultiplier: 1.1
+  hoverScaleMultiplier: 1
   hoverDuration: 0.2
-  clickScaleMultiplier: 1.05
+  clickScaleMultiplier: 0.97
   clickDuration: 0.1
   ease: 6
   ignoreTimeScale: 1
@@ -1801,8 +1898,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 4838501810126931584, guid: f4eb69ae4174c284482a76f0c2d0e0ff, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

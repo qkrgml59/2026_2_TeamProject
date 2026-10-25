@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
@@ -35,6 +36,9 @@ public class PointerHover : MonoBehaviour,
     public UnityEvent OnClick => onClick;
     public PointerUnityEvent OnPointerClickEvent => onPointerClick;
 
+    /// <summary>호버 시작(true) / 끝(false). 이미지 교체 등은 받는 쪽(HoverSpriteGroup)이 처리</summary>
+    public event Action<PointerHover, bool> HoverChanged;
+
     private Selectable selectable;
     private Vector3 originalScale;
     private Tween scaleTween;
@@ -55,7 +59,9 @@ public class PointerHover : MonoBehaviour,
 
     private void OnDisable()
     {
-        // 비활성화 시 상태와 크기를 원래대로 되돌림 (꺼졌다 켜졌을 때 커진 채로 남는 문제 방지)
+        // 비활성화 시 상태와 크기를 원래대로 (호버 중 꺼졌다 켜질 때 커진 채 남는 문제 방지)
+        if (isHovering) HoverChanged?.Invoke(this, false);
+
         isHovering = false;
         isPressed = false;
         scaleTween?.Kill();
@@ -67,6 +73,8 @@ public class PointerHover : MonoBehaviour,
         isHovering = true;
         if (!IsInteractable) return;
 
+        HoverChanged?.Invoke(this, true);
+
         if (isPressed) ScaleTo(ClickScale, clickDuration);
         else ScaleTo(HoverScale, hoverDuration);
     }
@@ -74,7 +82,9 @@ public class PointerHover : MonoBehaviour,
     public void OnPointerExit(PointerEventData eventData)
     {
         isHovering = false;
-        // 상호작용 불가 상태여도 원래 크기로는 항상 복귀
+        HoverChanged?.Invoke(this, false);
+
+        // 상호작용 불가 상태에서도 원래 크기로는 항상 복귀
         ScaleTo(originalScale, hoverDuration);
     }
 
@@ -99,7 +109,7 @@ public class PointerHover : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // 같은 오브젝트에서 눌렀다 뗐을 때만 EventSystem이 호출해 줌
+        // 같은 오브젝트에서 눌렀다 뗐을 때만 EventSystem이 호출함
         if (!IsValidButton(eventData) || !IsInteractable) return;
 
         onClick.Invoke();
