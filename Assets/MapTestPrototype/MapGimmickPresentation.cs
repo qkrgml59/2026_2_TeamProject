@@ -248,6 +248,8 @@ namespace Hwanjo.MapPlay
         //대시 획득 패널을 우선 표시하고, 그 외에는 가장 가까운 조작 안내 하나만 표시
         private void OnGUI()
         {
+            // 지도 위로 월드 조작 안내·획득 패널이 겹치지 않도록 표시만 숨김.
+            if (player != null && player.TryGetComponent<MapOverviewUI>(out var map) && map.IsOpen) return;
             titleStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, font = uiFont, fontSize = 42, fontStyle = FontStyle.Bold };
             hintStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, font = uiFont, fontSize = 20, wordWrap = true };
             Color previous = GUI.color;
