@@ -25,6 +25,8 @@ namespace Hwanjo.MapPlay
         private void Awake()
         {
             movement = GetComponent<BasicPlayerMovement2D>();
+            // MapTest 프로토타입은 아트 버전과 관계없이 슬라이딩을 사용하지 않음.
+            movement.SetSlideEnabled(false);
             health = GetComponent<Health2D>();
             if (SaveManager.Instance == null)
             {

@@ -62,6 +62,7 @@ namespace FourGuardians.CourseContent.Movement
         private float actionTimer;
         private int facing = 1;
         private bool jumpRequested;
+        private bool slideEnabled = true;
         private bool nearLadder;
         private bool isClimbing;
         private bool atLadderTop;
@@ -138,6 +139,9 @@ namespace FourGuardians.CourseContent.Movement
 
         /// <summary>MapTest의 획득 진행도를 연결합니다. 기본값 true는 기존 씬의 대시 사용을 유지합니다.</summary>
         public void SetDashUnlocked(bool unlocked) => dashUnlocked = unlocked;
+
+        /// <summary>MapTest에서는 불필요한 슬라이딩 진입만 막고 다른 씬은 기존 동작을 유지합니다.</summary>
+        public void SetSlideEnabled(bool allow) => slideEnabled = allow;
 
         /// <summary>키 입력과 능력 해금이 같은 대시 진입 조건을 사용합니다.</summary>
         public bool RequestDash()
@@ -233,7 +237,7 @@ namespace FourGuardians.CourseContent.Movement
             bool down = keyboard != null && (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed);
             if (IsGrounded)
             {
-                if (down && Mathf.Abs(horizontal) > 0.01f) Begin(WarriorAction.Slide, 0.5f);
+                if (slideEnabled && down && Mathf.Abs(horizontal) > 0.01f) Begin(WarriorAction.Slide, 0.5f);
                 else Action = down ? WarriorAction.Crouch : Mathf.Abs(horizontal) > 0.01f ? WarriorAction.Run : WarriorAction.Idle;
                 return;
             }
