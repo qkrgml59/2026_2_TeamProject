@@ -2021,6 +2021,8 @@ MonoBehaviour:
   maxHealth: 8
   team: 0
   invincibleDuration: 0.25
+  damagePopupPrefab: {fileID: 0}
+  popupOffsetY: 0.8
 --- !u!114 &644121958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2036,6 +2038,7 @@ MonoBehaviour:
   moveSpeed: 5
   jumpSpeed: 9
   dashSpeed: 11
+  dashUnlocked: 1
   slideSpeed: 8
   ladderSpeed: 3
   wallSlideSpeed: 2
@@ -2043,6 +2046,8 @@ MonoBehaviour:
   wallJumpInputLockDuration: 0.18
   wallVisualInsetRatio: 0.5
   wallContactSkin: 0.01
+  allowDropThrough: 0
+  dropInitialSpeed: 2
 --- !u!70 &644121959
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2089,7 +2094,7 @@ Transform:
   m_GameObject: {fileID: 644121953}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4, y: -1.4, z: 0}
+  m_LocalPosition: {x: 7.15, y: -1.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2367,6 +2372,8 @@ MonoBehaviour:
   maxHealth: 4
   team: 1
   invincibleDuration: 0.25
+  damagePopupPrefab: {fileID: 6597226854645090982, guid: f7e0a15b8d08e1d4281f21ef8ed8beda, type: 3}
+  popupOffsetY: 0.8
 --- !u!114 &976307753
 MonoBehaviour:
   m_ObjectHideFlags: 0
