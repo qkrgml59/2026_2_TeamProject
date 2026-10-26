@@ -11394,7 +11394,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 591845051455824656, guid: b0efcd88d246c414d99ad619164a74d7, type: 3}
       propertyPath: newGameSceneName
-      value: Test_Gimmick
+      value: MapTest
       objectReference: {fileID: 0}
     - target: {fileID: 591845051455824656, guid: b0efcd88d246c414d99ad619164a74d7, type: 3}
       propertyPath: useDontDestroyOnLoad
